@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "plugins": [{
+      "name": "typescript-tslint-plugin"
+    }],
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "jsx": "react",
+    "lib": ["esnext", "dom"],
+    "sourceMap": true
+  }
+}

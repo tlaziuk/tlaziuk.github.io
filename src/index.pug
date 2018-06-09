@@ -1,0 +1,14 @@
+doctype html
+html
+    head
+        title= htmlWebpackPlugin.options.title
+        each cssFile in htmlWebpackPlugin.files.css
+            link(rel="preload" as="style" href=cssFile)
+        each jsFile in htmlWebpackPlugin.files.js
+            link(rel="preload" as="script" href=jsFile)
+        each cssFile in htmlWebpackPlugin.files.css
+            link(rel="stylesheet" href=cssFile)
+    body
+        div(id="root")
+        each jsFile in htmlWebpackPlugin.files.js
+            script(defer src=jsFile)
