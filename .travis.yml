@@ -4,9 +4,14 @@ node_js:
 cache: npm
 deploy:
   provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  target_branch: master
+  keep_history: false
   fqdn: $FQDN
-  local-dir: dist/
+  local_dir: dist/
   on:
     branch: source
+script:
+  - npm run test
+  - npm run build:prod
