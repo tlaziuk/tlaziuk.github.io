@@ -6,8 +6,6 @@ export default withStyles(
     ({ palette }) => ({
         ["@global"]: {
             body: {
-                backgroundColor: palette.common.black,
-                color: palette.common.white,
                 height: "25vmax",
                 left: "50%",
                 maxHeight: "100vh",
@@ -18,12 +16,9 @@ export default withStyles(
                 width: "25vmax",
 
             },
-            html: {
-                backgroundColor: palette.common.black,
-            },
         },
         href: {
-            color: palette.common.white,
+            color: palette.text.primary,
             display: "block",
             height: "100%",
             width: "100%",
