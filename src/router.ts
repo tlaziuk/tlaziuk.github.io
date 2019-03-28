@@ -3,7 +3,7 @@
 import { ComponentType } from "react";
 import { distinctUntilChanged, map } from "rxjs/operators";
 import UniversalRouter, { Context } from "universal-router";
-import HomeComponent from "./home";
+import HomeComponent from "./page/home";
 import { router$ } from "./store";
 
 const router = new UniversalRouter<Context, ComponentType<any>>(
@@ -12,6 +12,11 @@ const router = new UniversalRouter<Context, ComponentType<any>>(
             path: "",
             action: () => HomeComponent,
             name: "homepage",
+        },
+        {
+            path: "konami",
+            action: () => HomeComponent,
+            name: "konami",
         },
     ],
     {
