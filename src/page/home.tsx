@@ -4,7 +4,6 @@ import React, { PureComponent } from "react";
 import { push } from "redux-first-routing";
 import Konami from "../component/konami";
 import store from "../store";
-import url from "../util/url";
 
 export default withStyles(
     ({ palette }) => ({
@@ -49,7 +48,8 @@ export default withStyles(
         </>;
     }
 
-    private readonly konami = () => {
+    private readonly konami = async () => {
+        const { default: url } = await import("../util/url");
         store.dispatch(push(url("konami")));
     }
 });

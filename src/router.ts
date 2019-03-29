@@ -9,13 +9,13 @@ import { router$ } from "./store";
 const router = new UniversalRouter<Context, ComponentType<any>>(
     [
         {
-            path: "",
+            path: "/",
             action: () => HomeComponent,
             name: "homepage",
         },
         {
-            path: "konami",
-            action: () => HomeComponent,
+            path: "/konami",
+            action: () => import("./page/secret").then((_) => _.default),
             name: "konami",
         },
     ],
