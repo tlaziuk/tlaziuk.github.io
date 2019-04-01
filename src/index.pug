@@ -11,12 +11,16 @@ html
                 rel="preload"
                 as="style"
                 href=cssFile
+                integrity=htmlWebpackPlugin.files.cssIntegrity ? htmlWebpackPlugin.files.cssIntegrity[index] : undefined
+                crossorigin=webpackConfig.output.crossOriginLoading
             )
         each jsFile in htmlWebpackPlugin.files.js
             link(
                 rel="preload"
                 as="script"
                 href=jsFile
+                integrity=htmlWebpackPlugin.files.jsIntegrity ? htmlWebpackPlugin.files.jsIntegrity[index] : undefined
+                crossorigin=webpackConfig.output.crossOriginLoading
             )
         each cssFile, index in htmlWebpackPlugin.files.css
             link(
