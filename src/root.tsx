@@ -2,7 +2,7 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import React, { ComponentType, lazy, LazyExoticComponent, PureComponent, Suspense } from "react";
 import { Unsubscribable } from "rxjs";
-import Progress from "./progress";
+import Progress from "./page/progress";
 import { resolvedRoute$ } from "./router";
 import theme from "./theme";
 

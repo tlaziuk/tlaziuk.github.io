@@ -1,6 +1,9 @@
 import { StyledComponentProps, withStyles } from "@material-ui/core/styles";
 import EmailIcon from "@material-ui/icons/Email";
 import React, { PureComponent } from "react";
+import { push } from "redux-first-routing";
+import Konami from "../component/konami";
+import store from "../store";
 
 export default withStyles(
     ({ palette }) => ({
@@ -34,11 +37,19 @@ export default withStyles(
         const {
             classes,
         } = this.props;
-        return <a href="mailto:tlaziuk+github@gmail.com" className={classes!.href}>
-            <EmailIcon
-                className={classes!.svg}
-                color={"inherit"}
-            />
-        </a>;
+        return <>
+            <Konami action={this.konami} />
+            <a href="mailto:tlaziuk+github@gmail.com" className={classes!.href}>
+                <EmailIcon
+                    className={classes!.svg}
+                    color={"inherit"}
+                />
+            </a>
+        </>;
+    }
+
+    private readonly konami = async () => {
+        const { default: url } = await import("../util/url");
+        store.dispatch(push(url("konami")));
     }
 });

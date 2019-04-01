@@ -1,6 +1,8 @@
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { join as pathJoin, normalize as pathNormalize } from "path";
 import { Configuration, Loader } from "webpack";
+// @ts-ignore no type defs
+import SriPlugin from "webpack-subresource-integrity";
 // @ts-ignore json
 import { name as title } from "./package.json";
 
@@ -57,14 +59,20 @@ module.exports = {
     },
     output: {
         chunkFilename: "[chunkhash].js",
+        crossOriginLoading: "anonymous",
         filename: "[chunkhash].js",
         path: pathNormalize(pathJoin(__dirname, "dist")),
         publicPath: "/",
     },
     plugins: [
         new HtmlWebpackPlugin({
+            inject: false,
             template: pathNormalize(pathJoin(__dirname, "src", "index.pug")),
             title,
+        }),
+        new SriPlugin({
+            enabled: isProduction,
+            hashFuncNames: ["sha256", "sha384"],
         }),
     ],
     resolve: {

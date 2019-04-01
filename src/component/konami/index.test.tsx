@@ -1,0 +1,61 @@
+import React from "react";
+import { create, ReactTestRenderer } from "react-test-renderer";
+import { DeepPartial } from "redux";
+import Konami from "./index";
+
+describe(Konami, () => {
+    let element: ReactTestRenderer;
+    let addEventListener: jest.Mock<void, [keyof DocumentEventMap, any]>;
+    let removeEventListener: jest.Mock<void, [keyof DocumentEventMap, any]>;
+    let listenerMap: Record<keyof DocumentEventMap, (..._: any[]) => any>;
+
+    beforeEach(() => {
+        listenerMap = {} as any;
+
+        addEventListener = jest.fn<void, [keyof DocumentEventMap, any]>(
+            (name, listener) => {
+                listenerMap[name] = listener;
+            },
+        );
+
+        removeEventListener = jest.fn<void, [keyof DocumentEventMap, any]>(
+            (name) => {
+                delete listenerMap[name];
+            },
+        );
+
+        element = create(
+            <Konami />,
+            {
+                createNodeMock: (): DeepPartial<HTMLElement> => ({
+                    ownerDocument: {
+                        addEventListener,
+                        removeEventListener,
+                    },
+                }),
+            },
+        );
+    });
+
+    it("should create element", () => {
+        expect(element.root!.find(({ type }) => typeof type === "string")).toBeTruthy();
+    });
+
+    it("should attach a listener", () => {
+        expect(listenerMap.keyup).toBeDefined();
+    });
+
+    it("should remove listener after unmount", () => {
+        element.unmount();
+        expect(listenerMap.keyup).toBeUndefined();
+    });
+
+    it("should call execute the action after default sequence", () => {
+        const action = jest.fn();
+        element.update(<Konami action={action} />);
+        for (const key of Konami.defaultProps.code!) {
+            listenerMap.keyup({ key });
+        }
+        expect(action).toBeCalled();
+    });
+});
