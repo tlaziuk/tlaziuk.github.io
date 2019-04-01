@@ -72,7 +72,7 @@ module.exports = {
         }),
         new SriPlugin({
             enabled: isProduction,
-            hashFuncNames: ["sha256", "sha384"],
+            hashFuncNames: ["sha256", "sha384", "sha512"],
         }),
     ],
     resolve: {
