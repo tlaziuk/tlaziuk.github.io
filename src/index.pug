@@ -6,7 +6,7 @@ html
             name="viewport"
             content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         )
-        each cssFile in htmlWebpackPlugin.files.css
+        each cssFile, index in htmlWebpackPlugin.files.css
             link(
                 rel="preload"
                 as="style"
@@ -14,7 +14,7 @@ html
                 integrity=htmlWebpackPlugin.files.cssIntegrity ? htmlWebpackPlugin.files.cssIntegrity[index] : undefined
                 crossorigin=webpackConfig.output.crossOriginLoading
             )
-        each jsFile in htmlWebpackPlugin.files.js
+        each jsFile, index in htmlWebpackPlugin.files.js
             link(
                 rel="preload"
                 as="script"
