@@ -68,8 +68,10 @@ module.exports = {
     plugins: [
         new EnvironmentPlugin({
             GIT_REV: childProcessExecSync("git rev-parse HEAD").toString().trim(),
+            TIMESTAMP: Date.now(),
         }),
         new HtmlWebpackPlugin({
+            chunksSortMode: "dependency",
             inject: false,
             template: pathNormalize(pathJoin(__dirname, "src", "index.pug")),
             title,
