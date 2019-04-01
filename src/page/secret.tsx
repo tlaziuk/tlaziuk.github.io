@@ -11,17 +11,14 @@ import store from "../store";
 export default class SecretComponent extends PureComponent {
     public render() {
         return <Dialog open={true} onClose={this.handleClose}>
-            <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+            <DialogTitle>Congratulations!</DialogTitle>
             <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                    Let Google help apps determine location. This means sending anonymous location data to
-                    Google, even when no apps are running.
-          </DialogContentText>
+                <DialogContentText>
+                    You've found the secret content of this website, although there is no secret content. 🙂
+                </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button onClick={this.handleClose} color="primary" autoFocus>
-                    Close
-          </Button>
+                <Button onClick={this.handleClose}>Close</Button>
             </DialogActions>
         </Dialog>;
     }

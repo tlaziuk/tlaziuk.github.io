@@ -14,4 +14,5 @@ deploy:
     branch: source
 script:
   - npm run test
+  - npm run lint
   - npm run build:prod
