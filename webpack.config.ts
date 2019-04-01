@@ -1,6 +1,7 @@
+import {execSync as childProcessExecSync} from "child_process";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { join as pathJoin, normalize as pathNormalize } from "path";
-import { Configuration, Loader } from "webpack";
+import { Configuration, EnvironmentPlugin, Loader } from "webpack";
 // @ts-ignore no type defs
 import SriPlugin from "webpack-subresource-integrity";
 // @ts-ignore json
@@ -65,6 +66,9 @@ module.exports = {
         publicPath: "/",
     },
     plugins: [
+        new EnvironmentPlugin({
+            GIT_REV: childProcessExecSync("git rev-parse HEAD").toString().trim(),
+        }),
         new HtmlWebpackPlugin({
             inject: false,
             template: pathNormalize(pathJoin(__dirname, "src", "index.pug")),
