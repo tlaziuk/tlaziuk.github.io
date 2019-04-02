@@ -1,4 +1,5 @@
-import {execSync as childProcessExecSync} from "child_process";
+import WasmPackPlugin from "@wasm-tool/wasm-pack-plugin";
+import { execSync as childProcessExecSync } from "child_process";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { join as pathJoin, normalize as pathNormalize } from "path";
 import { Configuration, EnvironmentPlugin, Loader } from "webpack";
@@ -66,6 +67,9 @@ module.exports = {
         publicPath: "/",
     },
     plugins: [
+        new WasmPackPlugin({
+            crateDirectory: pathNormalize(pathJoin(__dirname, "crate")),
+        }),
         new EnvironmentPlugin({
             GIT_REV: childProcessExecSync("git rev-parse HEAD").toString().trim(),
             TIMESTAMP: Date.now(),
