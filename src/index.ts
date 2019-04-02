@@ -8,3 +8,7 @@ render(
     createElement(RootComponent),
     el,
 );
+// @ts-ignore
+import("../crate/pkg").then((module: any) => {
+    module.run();
+});

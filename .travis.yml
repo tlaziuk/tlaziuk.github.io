@@ -12,6 +12,8 @@ deploy:
   local_dir: dist/
   on:
     branch: source
+before_install:
+  - curl https://sh.rustup.rs -sSf | sh
 script:
   - npm run test
   - npm run lint
