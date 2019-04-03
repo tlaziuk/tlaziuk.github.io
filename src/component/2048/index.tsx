@@ -11,6 +11,7 @@ interface ITile {
     y: number;
     value: number;
     uid: number;
+    isNew: boolean;
 }
 
 interface IVector {
@@ -49,13 +50,12 @@ export default withStyles(({ spacing }) => ({
         size: 4,
     };
 
-    private uid: number = 0;
-
     // tslint:disable-next-line:member-ordering
     public readonly state: Readonly<IState> = {
         data: Array(Math.pow(this.props.size, 2)).fill(undefined).map(
             ({ }, index) => ({
-                uid: this.uid++,
+                isNew: false,
+                uid: index,
                 value: 0,
                 x: (index % this.props.size) + 1,
                 y: Math.floor(index / this.props.size) + 1,
@@ -80,12 +80,12 @@ export default withStyles(({ spacing }) => ({
 
         return <div className={container} ref={this.handleRef}>{
             (data as ITile[]).sort((a, b) => a.uid - b.uid).map(
-                ({ x, y, value, uid }) => <div
+                (tile) => <div
                     className={item}
-                    key={uid}
-                    style={this.getTileStyle(x, y, value)}
+                    key={tile.uid}
+                    style={this.getTileStyle(tile)}
                 >
-                    <Tile value={value} />
+                    <Tile value={tile.value} />
                 </div>,
             )
         }</div>;
@@ -102,16 +102,17 @@ export default withStyles(({ spacing }) => ({
         }
     }
 
-    private getTileStyle(row: number, column: number, zIndex: number): CSSProperties {
+    private getTileStyle({ x, y, value, isNew }: Readonly<ITile>): CSSProperties {
         const { size } = this.props;
 
         const percentage = `${100 / size}%`;
 
         return {
             height: percentage,
-            transform: `translate(${(row - 1) * 100}%, ${(column - 1) * 100}%)`,
+            transform: `translate(${(x - 1) * 100}%, ${(y - 1) * 100}%)`,
+            transitionDuration: value === 0 || isNew ? "0s" : undefined,
             width: percentage,
-            zIndex,
+            zIndex: value,
         };
     }
 
@@ -127,6 +128,7 @@ export default withStyles(({ spacing }) => ({
             data: data.map(
                 (tile) => ({
                     ...tile,
+                    isNew: tile.uid === tileUid,
                     value: tile.uid === tileUid ? 1 : tile.value,
                 }),
             ),
@@ -261,7 +263,7 @@ export default withStyles(({ spacing }) => ({
                                 if (_.uid === tile.uid) {
                                     return {
                                         ..._,
-                                        uid: this.uid++,
+                                        uid: farthestTile.uid,
                                         value: 0,
                                     };
                                 } else if (_.uid === farthestTile.uid) {
