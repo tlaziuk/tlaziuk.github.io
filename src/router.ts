@@ -18,6 +18,11 @@ const router = new UniversalRouter<Context, ComponentType<any>>(
             action: () => import("./page/secret").then((_) => _.default),
             name: "konami",
         },
+        {
+            path: "/2048",
+            action: () => import("./page/2048").then((_) => _.default),
+            name: "2048",
+        },
     ],
     {
         errorHandler: () => HomePageComponent,
