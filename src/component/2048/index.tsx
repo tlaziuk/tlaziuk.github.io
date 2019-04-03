@@ -79,11 +79,11 @@ export default withStyles(({ spacing }) => ({
         } = this.state;
 
         return <div className={container} ref={this.handleRef}>{
-            data.map(
+            (data as ITile[]).sort((a, b) => a.uid - b.uid).map(
                 ({ x, y, value, uid }) => <div
                     className={item}
                     key={uid}
-                    style={this.getTileStyle(x, y)}
+                    style={this.getTileStyle(x, y, value)}
                 >
                     <Tile value={value} />
                 </div>,
@@ -102,7 +102,7 @@ export default withStyles(({ spacing }) => ({
         }
     }
 
-    private getTileStyle(row: number, column: number): CSSProperties {
+    private getTileStyle(row: number, column: number, zIndex: number): CSSProperties {
         const { size } = this.props;
 
         const percentage = `${100 / size}%`;
@@ -111,9 +111,13 @@ export default withStyles(({ spacing }) => ({
             height: percentage,
             transform: `translate(${(row - 1) * 100}%, ${(column - 1) * 100}%)`,
             width: percentage,
+            zIndex,
         };
     }
 
+    /**
+     * add a new tile to the board
+     */
     private newTile() {
         const { data } = this.state;
         const zeroValueTiles = data.filter(({ value }) => value === 0);
@@ -201,7 +205,6 @@ export default withStyles(({ spacing }) => ({
                     ),
                 ).subscribe((direction) => {
                     let { data } = this.state;
-                    const { size } = this.props;
                     let vector: IVector;
                     switch (direction) {
                         case "right": {
@@ -264,6 +267,7 @@ export default withStyles(({ spacing }) => ({
                                 } else if (_.uid === farthestTile.uid) {
                                     return {
                                         ..._,
+                                        uid: tile.uid,
                                         value: tile.value + farthestTile.value,
                                     };
                                 }
