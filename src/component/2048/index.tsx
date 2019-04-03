@@ -6,6 +6,12 @@ import { fromEvent, merge, Unsubscribable } from "rxjs";
 import { filter, map, mapTo, share } from "rxjs/operators";
 import Tile from "./tile";
 
+const enum GameState {
+    Playing,
+    Won,
+    Lost,
+}
+
 interface ITile {
     x: number;
     y: number;
@@ -21,10 +27,14 @@ interface IVector {
 
 interface IState {
     data: ReadonlyArray<Readonly<ITile>>;
+    gameState: GameState;
 }
 
 interface IProps {
     size: number;
+    onScore?: (_: number) => void;
+    onWin?: (_: number) => void;
+    onLose?: (_: number) => void;
 }
 
 export default withStyles(({ spacing }) => ({
@@ -52,15 +62,8 @@ export default withStyles(({ spacing }) => ({
 
     // tslint:disable-next-line:member-ordering
     public readonly state: Readonly<IState> = {
-        data: Array(Math.pow(this.props.size, 2)).fill(undefined).map(
-            ({ }, index) => ({
-                isNew: false,
-                uid: index,
-                value: 0,
-                x: (index % this.props.size) + 1,
-                y: Math.floor(index / this.props.size) + 1,
-            }),
-        ),
+        data: this.buildBoard(),
+        gameState: GameState.Playing,
     };
 
     private document?: Document;
@@ -95,6 +98,53 @@ export default withStyles(({ spacing }) => ({
         this.newTile();
     }
 
+    public componentDidUpdate(
+        {
+            size: prevSize,
+        }: Readonly<IProps>,
+        {
+            data: prevData,
+            gameState: prevGameState,
+        }: Readonly<IState>,
+    ) {
+        const { data, gameState } = this.state;
+        const { onScore, onLose, onWin, size } = this.props;
+
+        const score = data.reduce<number>(
+            (_, { value }) => _ + value,
+            0,
+        );
+
+        if (data !== prevData) {
+            if (onScore && score !== prevData.reduce<number>(
+                (_, { value }) => _ + value,
+                0,
+            )) {
+                onScore(score);
+            }
+
+            if (data.filter(({ value }) => value === 2048).length > 0) {
+                this.setState({ gameState: GameState.Won });
+            } else if (data.filter(({ value }) => value === 0).length === 0) {
+                this.setState({ gameState: GameState.Lost });
+            }
+
+        }
+
+        if (gameState !== prevGameState) {
+            if (onLose && gameState === GameState.Lost) {
+                onLose(score);
+            }
+            if (onWin && gameState === GameState.Won) {
+                onWin(score);
+            }
+        }
+
+        if (size !== prevSize) {
+            this.setState({ data: this.buildBoard(size) });
+        }
+    }
+
     public componentWillUnmount() {
         const { subscription } = this;
         if (subscription) {
@@ -114,6 +164,18 @@ export default withStyles(({ spacing }) => ({
             width: percentage,
             zIndex: value,
         };
+    }
+
+    private buildBoard(size = this.props.size): ITile[] {
+        return Array(Math.pow(size, 2)).fill(undefined).map(
+            ({ }, index) => ({
+                isNew: false,
+                uid: index,
+                value: 0,
+                x: (index % size) + 1,
+                y: Math.floor(index / size) + 1,
+            }),
+        );
     }
 
     /**
@@ -205,6 +267,8 @@ export default withStyles(({ spacing }) => ({
                         filter((_) => _ === "ArrowLeft"),
                         mapTo("left" as "left"),
                     ),
+                ).pipe(
+                    filter(() => this.state.gameState === GameState.Playing),
                 ).subscribe((direction) => {
                     let { data } = this.state;
                     let vector: IVector;
