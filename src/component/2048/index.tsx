@@ -13,6 +13,11 @@ interface ITile {
     uid: number;
 }
 
+interface IVector {
+    x: -1 | 0 | 1;
+    y: -1 | 0 | 1;
+}
+
 interface IState {
     data: ReadonlyArray<Readonly<ITile>>;
 }
@@ -124,6 +129,43 @@ export default withStyles(({ spacing }) => ({
         });
     }
 
+    /**
+     * check if given coordinates are on board
+     */
+    private isOnBoard(x: ITile["x"], y: ITile["y"]) {
+        const { size } = this.props;
+        return x >= 1 && x <= size && y >= 1 && y <= size;
+    }
+
+    private getTile(x: ITile["x"], y: ITile["y"], data: IState["data"]) {
+        return data.find((_) => _.x === x && _.y === y);
+    }
+
+    private findFarthestTile(
+        tile: Readonly<ITile>,
+        vector: Readonly<IVector>,
+        data: IState["data"],
+        searchingTile = tile,
+    ): Readonly<ITile> {
+        if (vector.x === 0 && vector.y === 0) {
+            return tile;
+        }
+
+        const x = tile.x + vector.x;
+        const y = tile.y + vector.y;
+
+        if (this.isOnBoard(x, y)) {
+            const farthestTile = this.getTile(x, y, data)!;
+            if (farthestTile.value === 0) {
+                return this.findFarthestTile(farthestTile, vector, data, searchingTile);
+            } else if (farthestTile.value === searchingTile.value) {
+                return farthestTile;
+            }
+        }
+
+        return tile;
+    }
+
     private readonly handleRef = (element: HTMLElement | null) => {
         if (element) {
             const document = element.ownerDocument;
@@ -160,108 +202,77 @@ export default withStyles(({ spacing }) => ({
                 ).subscribe((direction) => {
                     let { data } = this.state;
                     const { size } = this.props;
+                    let vector: IVector;
                     switch (direction) {
                         case "right": {
-                            for (let x = size; x >= 1; x--) {
-                                for (let y = 1; y <= size; y++) {
-                                    const tile = data.find(
-                                        (_) => _.x === x && _.y === y,
-                                    )!;
-                                    if (tile.value === 0) {
-                                        continue;
-                                    }
-                                    let i = x + 1;
-                                    let rightTile: Readonly<ITile> | undefined;
-                                    while ((!rightTile) && (i <= size)) {
-                                        rightTile = data.find(
-                                            (_) => _.x === i && _.y === y && _.value === tile.value,
-                                        );
-                                        i++;
-                                    }
-                                    if (!rightTile) {
-                                        i = size;
-                                        while ((!rightTile) && (i > tile.x)) {
-                                            rightTile = data.find(
-                                                (_) => _.x === i && _.y === y && _.value === 0,
-                                            );
-                                            i--;
-                                        }
-                                    }
-                                    if (rightTile && !(tile.value === 0 && rightTile.value === 0)) {
-                                        data = data.map(
-                                            (_) => {
-                                                if (_.uid === rightTile!.uid) {
-                                                    return {
-                                                        ..._,
-                                                        value: rightTile!.value + tile.value,
-                                                    };
-                                                } else if (_.uid === tile.uid) {
-                                                    return {
-                                                        ..._,
-                                                        uid: this.uid++,
-                                                        value: 0,
-                                                    };
-                                                } else {
-                                                    return _;
-                                                }
-                                            },
-                                        );
-                                    }
-                                }
-                            }
+                            vector = { x: 1, y: 0 };
                             break;
                         }
                         case "left": {
-                            for (let x = 1; x <= size; x++) {
-                                for (let y = 1; y <= size; y++) {
-                                    const tile = data.find(
-                                        (_) => _.x === x && _.y === y,
-                                    )!;
-                                    if (tile.value === 0) {
-                                        continue;
-                                    }
-                                    let i = x - 1;
-                                    let leftTile: Readonly<ITile> | undefined;
-                                    while ((!leftTile) && (i >= 1)) {
-                                        leftTile = data.find(
-                                            (_) => _.x === i && _.y === y && _.value === tile.value,
-                                        );
-                                        i--;
-                                    }
-                                    if (!leftTile) {
-                                        i = 1;
-                                        while ((!leftTile) && (i < tile.x)) {
-                                            leftTile = data.find(
-                                                (_) => _.x === i && _.y === y && _.value === 0,
-                                            );
-                                            i++;
-                                        }
-                                    }
-                                    if (leftTile && !(tile.value === 0 && leftTile.value === 0)) {
-                                        data = data.map(
-                                            (_) => {
-                                                if (_.uid === leftTile!.uid) {
-                                                    return {
-                                                        ..._,
-                                                        value: leftTile!.value + tile.value,
-                                                    };
-                                                } else if (_.uid === tile.uid) {
-                                                    return {
-                                                        ..._,
-                                                        uid: this.uid++,
-                                                        value: 0,
-                                                    };
-                                                } else {
-                                                    return _;
-                                                }
-                                            },
-                                        );
-                                    }
-                                }
-                            }
+                            vector = { x: -1, y: 0 };
+                            break;
+                        }
+                        case "up": {
+                            vector = { x: 0, y: -1 };
+                            break;
+                        }
+                        case "down": {
+                            vector = { x: 0, y: 1 };
+                            break;
+                        }
+                        default: {
+                            vector = { x: 0, y: 0 };
                             break;
                         }
                     }
+
+                    for (const tile of data.slice().sort(
+                        (a, b) => {
+                            if (vector.x === -1) {
+                                return a.x - b.x;
+                            }
+                            if (vector.x === 1) {
+                                return b.x - a.x;
+                            }
+                            if (vector.y === -1) {
+                                return a.y - b.y;
+                            }
+                            if (vector.y === 1) {
+                                return b.y - a.y;
+                            }
+                            return 0;
+                        },
+                    )) {
+                        if (tile.value === 0) {
+                            continue;
+                        }
+
+                        const farthestTile = this.findFarthestTile(tile, vector!, data);
+
+                        if (tile.uid === farthestTile.uid) {
+                            continue;
+                        }
+
+                        data = data.map(
+                            (_) => {
+                                if (_.uid === tile.uid) {
+                                    return {
+                                        ..._,
+                                        uid: this.uid++,
+                                        value: 0,
+                                    };
+                                } else if (_.uid === farthestTile.uid) {
+                                    return {
+                                        ..._,
+                                        value: tile.value + farthestTile.value,
+                                    };
+                                }
+
+                                return _;
+                            },
+                        );
+                    }
+
                     this.setState({ data });
                     this.newTile();
                 });
