@@ -3,7 +3,7 @@
 import { withStyles, WithStyles } from "@material-ui/core/styles";
 import React, { CSSProperties, PureComponent } from "react";
 import { fromEvent, merge, Unsubscribable } from "rxjs";
-import { filter, map, mapTo, share } from "rxjs/operators";
+import { filter, map, mapTo, share, switchMap, take } from "rxjs/operators";
 import Tile from "./tile";
 
 const enum GameState {
@@ -239,6 +239,55 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
                     share(),
                 );
 
+                const touch$ = fromEvent<TouchEvent>(document, "touchstart").pipe(
+                    filter(
+                        // allow only one-finger touch
+                        ({ touches }) => touches.length === 1,
+                    ),
+                    map(
+                        ({ touches }) => touches[0],
+                    ),
+                    switchMap(
+                        // assign the touch endevent
+                        (touchStart) => fromEvent<TouchEvent>(document, "touchend").pipe(
+                            map(
+                                // identify the leaving finger
+                                ({ changedTouches }) => Array.from(changedTouches).find(
+                                    ({ identifier }) => identifier === touchStart.identifier,
+                                ),
+                            ),
+                            filter(
+                                // `find` method may fail, filter out the result
+                                (_): _ is Touch => _ as any,
+                            ),
+                            take(1),
+                            map(
+                                // extract coordinates from events
+                                (touchEnd) => {
+                                    const { clientX: aX, clientY: aY } = touchStart;
+                                    const { clientX: bX, clientY: bY } = touchEnd;
+                                    return { aX, aY, bX, bY };
+                                },
+                            ),
+                        ),
+                    ),
+                    filter(
+                        // filter out clicks/taps
+                        ({ aX, aY, bX, bY }) => aX !== bX || aY !== bY,
+                    ),
+                    map(
+                        /**
+                         * angle between two points in degrees
+                         *
+                         * imagine that as the 0 is on the right of virtual circle,
+                         * degrees up to -180 are on the left of 0,
+                         * degrees up to 180 are on the right of 0
+                         */
+                        ({ aX, aY, bX, bY }) => Math.atan2(bY - aY, bX - aX) * 180 / Math.PI,
+                    ),
+                    share(),
+                );
+
                 this.subscription = merge(
                     key$.pipe(
                         filter((_) => _ === "ArrowUp"),
@@ -255,6 +304,23 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
                     key$.pipe(
                         filter((_) => _ === "ArrowLeft"),
                         mapTo("left" as "left"),
+                    ),
+                    touch$.pipe(
+                        map(
+                            (degree) => {
+                                if (degree > -45 && degree < 45) {
+                                    return "right" as "right";
+                                } else if (degree > -135 && degree < -45) {
+                                    return "up" as "up";
+                                } else if (degree > 45 && degree < 135) {
+                                    return "down" as "down";
+                                } else if ((degree > -180 && degree < -135) || (degree > 135 && degree < 180)) {
+                                    return "left" as "left";
+                                } else {
+                                    return undefined as never;
+                                }
+                            },
+                        ),
                     ),
                 ).pipe(
                     filter(() => this.state.gameState === GameState.Playing),
@@ -279,8 +345,7 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
                             break;
                         }
                         default: {
-                            vector = { x: 0, y: 0 };
-                            break;
+                            return;
                         }
                     }
 
