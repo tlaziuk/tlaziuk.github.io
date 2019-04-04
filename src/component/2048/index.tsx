@@ -32,30 +32,12 @@ interface IState {
 
 interface IProps {
     size: number;
-    onScore?: (_: number) => void;
-    onWin?: (_: number) => void;
-    onLose?: (_: number) => void;
+    onScore?: (_: number, data: IState["data"]) => void;
+    onWin?: (_: number, data: IState["data"]) => void;
+    onLose?: (_: number, data: IState["data"]) => void;
 }
 
-export default withStyles(({ spacing }) => ({
-    container: {
-        display: "block",
-        height: "100%",
-        position: "relative",
-        width: "100%",
-    },
-    item: {
-        display: "inline-block",
-        left: 0,
-        padding: spacing.unit,
-        position: "absolute",
-        top: 0,
-        transformOrigin: "center",
-        transitionDuration: "0.25s",
-        transitionProperty: "all",
-        transitionTimingFunction: "ease-in-out",
-    },
-}))(class Game2048 extends PureComponent<WithStyles & IProps, IState> {
+export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
     public static readonly defaultProps: Readonly<Partial<IProps>> = {
         size: 4,
     };
@@ -120,7 +102,7 @@ export default withStyles(({ spacing }) => ({
                 (_, { value }) => _ + value,
                 0,
             )) {
-                onScore(score);
+                onScore(score, data);
             }
 
             if (data.filter(({ value }) => value === 2048).length > 0) {
@@ -133,10 +115,10 @@ export default withStyles(({ spacing }) => ({
 
         if (gameState !== prevGameState) {
             if (onLose && gameState === GameState.Lost) {
-                onLose(score);
+                onLose(score, data);
             }
             if (onWin && gameState === GameState.Won) {
-                onWin(score);
+                onWin(score, data);
             }
         }
 
@@ -150,6 +132,13 @@ export default withStyles(({ spacing }) => ({
         if (subscription) {
             subscription.unsubscribe();
         }
+    }
+
+    public restart() {
+        this.setState({
+            data: this.buildBoard(),
+            gameState: GameState.Playing,
+        });
     }
 
     private getTileStyle({ x, y, value, isNew }: Readonly<ITile>): CSSProperties {
@@ -349,4 +338,24 @@ export default withStyles(({ spacing }) => ({
             }
         }
     }
-});
+}
+
+export default withStyles(({ spacing }) => ({
+    container: {
+        display: "block",
+        height: "100%",
+        position: "relative",
+        width: "100%",
+    },
+    item: {
+        display: "inline-block",
+        left: 0,
+        padding: spacing.unit,
+        position: "absolute",
+        top: 0,
+        transformOrigin: "center",
+        transitionDuration: "0.25s",
+        transitionProperty: "all",
+        transitionTimingFunction: "ease-in-out",
+    },
+}))(Game2048);

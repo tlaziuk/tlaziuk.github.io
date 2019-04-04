@@ -122,7 +122,7 @@ export default withStyles(
 
         return <Paper
             className={tile}
-            style={{ backgroundColor }}
+            style={{ backgroundColor, color: getContrastText(backgroundColor) }}
         >
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={svg}>
                 <text textAnchor="middle" x="12" y="17" className={text}>{value > 0 ? value : undefined}</text>

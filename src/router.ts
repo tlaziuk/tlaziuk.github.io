@@ -3,14 +3,13 @@
 import { ComponentType } from "react";
 import { distinctUntilChanged, map } from "rxjs/operators";
 import UniversalRouter, { Context } from "universal-router";
-import HomePageComponent from "./page/home";
 import { router$ } from "./store";
 
 const router = new UniversalRouter<Context, ComponentType<any>>(
     [
         {
             path: "/",
-            action: () => HomePageComponent,
+            action: () => import("./page/home").then((_) => _.default),
             name: "homepage",
         },
         {
@@ -25,7 +24,7 @@ const router = new UniversalRouter<Context, ComponentType<any>>(
         },
     ],
     {
-        errorHandler: () => HomePageComponent,
+        errorHandler: () => import("./page/home").then((_) => _.default),
     },
 );
 

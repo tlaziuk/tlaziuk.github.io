@@ -12,5 +12,8 @@
     "jsx": "react",
     "lib": ["esnext", "dom"],
     "sourceMap": true
-  }
+  },
+  "exclude": [
+    "/node_modules",
+  ],
 }
