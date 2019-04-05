@@ -52,9 +52,11 @@
   "dependencies": {
     "@material-ui/core": "^3.0.0",
     "@material-ui/icons": "^3.0.0",
+    "@types/fscreen": "^1.0.0",
     "@types/react": "^16.0.0",
     "@types/react-dom": "^16.0.0",
     "@types/redux-first-routing": "^0.3.0",
+    "fscreen": "^1.0.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "redux-devtools-extension": "^2.0.0",

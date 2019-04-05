@@ -9,7 +9,7 @@ const router = new UniversalRouter<Context, ComponentType<any>>(
     [
         {
             path: "/",
-            action: () => import("./page/home").then((_) => _.default),
+            action: () => import(/* webpackPreload: true */"./page/home").then((_) => _.default),
             name: "homepage",
         },
         {
