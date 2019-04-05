@@ -7,6 +7,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import React, { PureComponent } from "react";
 import { push } from "redux-first-routing";
 import store from "../store";
+import url from "../util/url";
 
 export default class SecretComponent extends PureComponent {
     public render() {
@@ -23,8 +24,7 @@ export default class SecretComponent extends PureComponent {
         </Dialog>;
     }
 
-    private readonly handleClose = async () => {
-        const { default: url } = await import("../util/url");
+    private readonly handleClose = () => {
         store.dispatch(push(url("homepage")));
     }
 }

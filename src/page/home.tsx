@@ -7,6 +7,7 @@ import BuildDate from "../component/build-date";
 import GitRevision from "../component/git-revision";
 import Konami from "../component/konami";
 import store from "../store";
+import url from "../util/url";
 
 export default withStyles(
     ({ palette, spacing }) => ({
@@ -60,8 +61,7 @@ export default withStyles(
         </>;
     }
 
-    private readonly konami = async () => {
-        const { default: url } = await import("../util/url");
+    private readonly konami = () => {
         store.dispatch(push(url("konami")));
     }
 });
