@@ -30,8 +30,51 @@ interface IState {
     gameState: GameState;
 }
 
+const buildBoard = (size: number): ITile[] => Array(Math.pow(size, 2)).fill(undefined).map(
+    ({ }, index) => ({
+        isNew: false,
+        uid: index,
+        value: 0,
+        x: (index % size) + 1,
+        y: Math.floor(index / size) + 1,
+    }),
+);
+
+const getTile = (x: ITile["x"], y: ITile["y"], data: IState["data"]) => data.find((_) => _.x === x && _.y === y);
+
+/**
+ * check if given coordinates are on board
+ */
+const isOnBoard = (x: ITile["x"], y: ITile["y"], size: IProps["size"]) => x >= 1 && x <= size && y >= 1 && y <= size;
+
+const findFarthestTile = (
+    tile: Readonly<ITile>,
+    vector: Readonly<IVector>,
+    data: IState["data"],
+    searchingTile = tile,
+): Readonly<ITile> => {
+    if (vector.x === 0 && vector.y === 0) {
+        return tile;
+    }
+
+    const x = tile.x + vector.x;
+    const y = tile.y + vector.y;
+
+    if (isOnBoard(x, y, Math.sqrt(data.length))) {
+        const farthestTile = getTile(x, y, data)!;
+        if (farthestTile.value === 0) {
+            return findFarthestTile(farthestTile, vector, data, searchingTile);
+        } else if (farthestTile.value === searchingTile.value) {
+            return farthestTile;
+        }
+    }
+
+    return tile;
+};
+
 interface IProps {
     size: number;
+    initialData?: IState["data"];
     onScore?: (_: number, data: IState["data"]) => void;
     onWin?: (_: number, data: IState["data"]) => void;
     onLose?: (_: number, data: IState["data"]) => void;
@@ -44,7 +87,14 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
 
     // tslint:disable-next-line:member-ordering
     public readonly state: Readonly<IState> = {
-        data: this.buildBoard(),
+        data: (() => {
+            const { initialData, size } = this.props;
+            if (initialData && initialData.length === Math.pow(size, 2)) {
+                return initialData;
+            } else {
+                return buildBoard(size);
+            }
+        })(),
         gameState: GameState.Playing,
     };
 
@@ -74,10 +124,6 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
                 </div>,
             )
         }</div>;
-    }
-
-    public componentDidMount() {
-        this.newTile();
     }
 
     public componentDidUpdate(
@@ -123,7 +169,7 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
         }
 
         if (size !== prevSize) {
-            this.setState({ data: this.buildBoard(size) });
+            this.setState({ data: buildBoard(size) });
         }
     }
 
@@ -135,8 +181,9 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
     }
 
     public restart() {
+        const { size } = this.props;
         this.setState({
-            data: this.buildBoard(),
+            data: buildBoard(size),
             gameState: GameState.Playing,
         });
     }
@@ -153,18 +200,6 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
             width: percentage,
             zIndex: value,
         };
-    }
-
-    private buildBoard(size = this.props.size): ITile[] {
-        return Array(Math.pow(size, 2)).fill(undefined).map(
-            ({ }, index) => ({
-                isNew: false,
-                uid: index,
-                value: 0,
-                x: (index % size) + 1,
-                y: Math.floor(index / size) + 1,
-            }),
-        );
     }
 
     /**
@@ -184,43 +219,6 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
                 }),
             ),
         });
-    }
-
-    /**
-     * check if given coordinates are on board
-     */
-    private isOnBoard(x: ITile["x"], y: ITile["y"]) {
-        const { size } = this.props;
-        return x >= 1 && x <= size && y >= 1 && y <= size;
-    }
-
-    private getTile(x: ITile["x"], y: ITile["y"], data: IState["data"]) {
-        return data.find((_) => _.x === x && _.y === y);
-    }
-
-    private findFarthestTile(
-        tile: Readonly<ITile>,
-        vector: Readonly<IVector>,
-        data: IState["data"],
-        searchingTile = tile,
-    ): Readonly<ITile> {
-        if (vector.x === 0 && vector.y === 0) {
-            return tile;
-        }
-
-        const x = tile.x + vector.x;
-        const y = tile.y + vector.y;
-
-        if (this.isOnBoard(x, y)) {
-            const farthestTile = this.getTile(x, y, data)!;
-            if (farthestTile.value === 0) {
-                return this.findFarthestTile(farthestTile, vector, data, searchingTile);
-            } else if (farthestTile.value === searchingTile.value) {
-                return farthestTile;
-            }
-        }
-
-        return tile;
     }
 
     private readonly handleRef = (element: HTMLElement | null) => {
@@ -370,7 +368,7 @@ export class Game2048 extends PureComponent<WithStyles & IProps, IState> {
                             continue;
                         }
 
-                        const farthestTile = this.findFarthestTile(tile, vector!, data);
+                        const farthestTile = findFarthestTile(tile, vector!, data);
 
                         if (tile.uid === farthestTile.uid) {
                             continue;
