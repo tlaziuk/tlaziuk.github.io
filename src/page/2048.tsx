@@ -14,6 +14,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import DoneIcon from "@material-ui/icons/Done";
 import FullscreenIcon from "@material-ui/icons/Fullscreen";
 import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
+import ReplayIcon from "@material-ui/icons/Replay";
 import fscreen from "fscreen";
 import React, { ComponentProps, HTMLProps, PureComponent } from "react";
 import { push } from "redux-first-routing";
@@ -28,11 +29,20 @@ interface IState {
     score: number;
     loseDialog: boolean;
     winDialog: boolean;
+    restartDialog: boolean;
     containerWidth: number;
     containerHeight: number;
     fullScreen: boolean;
     snackbarFullScreen: boolean;
 }
+
+const initialData = (() => {
+    try {
+        return JSON.parse(localStorage.getItem("2048")!);
+    } catch {
+        // pass
+    }
+})();
 
 export default withStyles(({ spacing }) => ({
     containerClass: {
@@ -55,6 +65,7 @@ export default withStyles(({ spacing }) => ({
         containerWidth: 0,
         fullScreen: false,
         loseDialog: false,
+        restartDialog: false,
         score: 0,
         snackbarFullScreen: (() => {
             try {
@@ -92,6 +103,7 @@ export default withStyles(({ spacing }) => ({
             score,
             fullScreen,
             snackbarFullScreen,
+            restartDialog,
         } = this.state;
 
         const {
@@ -117,6 +129,7 @@ export default withStyles(({ spacing }) => ({
                             onWin={this.handleWin}
                             onScore={this.handleScore}
                             innerRef={this.handleRef}
+                            initialData={initialData}
                         />
                     </Grid>
                 </Grid>
@@ -131,20 +144,27 @@ export default withStyles(({ spacing }) => ({
                     <Grid item>
                         <Typography variant="h3">2048</Typography>
                     </Grid>
-                    <Grid item>{
-                        fullScreen ?
-                            <Tooltip title="Exit fullscreen">
-                                <IconButton onClick={this.exitFullscreen}>
-                                    <FullscreenExitIcon />
-                                </IconButton>
-                            </Tooltip>
-                            :
-                            <Tooltip title="Enter fullscreen">
-                                <IconButton onClick={this.enterFullscreen}>
-                                    <FullscreenIcon />
-                                </IconButton>
-                            </Tooltip>
-                    }</Grid>
+                    <Grid item>
+                        <Tooltip title="Restart">
+                            <IconButton onClick={this.handleRestartDialogOpen}>
+                                <ReplayIcon />
+                            </IconButton>
+                        </Tooltip>
+                        {
+                            fullScreen ?
+                                <Tooltip title="Exit fullscreen">
+                                    <IconButton onClick={this.exitFullscreen}>
+                                        <FullscreenExitIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                :
+                                <Tooltip title="Enter fullscreen">
+                                    <IconButton onClick={this.enterFullscreen}>
+                                        <FullscreenIcon />
+                                    </IconButton>
+                                </Tooltip>
+                        }
+                    </Grid>
                     <Grid item xs={12}>
                         <Typography variant="h4">Score: {score}</Typography>
                     </Grid>
@@ -170,6 +190,15 @@ export default withStyles(({ spacing }) => ({
                     <Button onClick={this.handleWinDialogExit}>Exit!</Button>
                 </DialogActions>
             </Dialog>
+            <Dialog open={restartDialog} onClose={this.handleRestartDialogNo}>
+                <DialogContent>
+                    <DialogContentText>Do you really want to restart the game?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleRestartDialogYes}>Yes</Button>
+                    <Button onClick={this.handleRestartDialogNo}>No</Button>
+                </DialogActions>
+            </Dialog>
             <Snackbar
                 anchorOrigin={{
                     horizontal: "left",
@@ -184,17 +213,21 @@ export default withStyles(({ spacing }) => ({
                     <span id="snackbar-fullscreen-message">You can enter fullscreen for better experience 🙂</span>
                 }
                 action={[
-                    <Tooltip title="Enter fullscreen">
+                    <Tooltip
+                        title="Enter fullscreen"
+                        key="fullscreen"
+                    >
                         <IconButton
-                            key="fullscreen"
                             color="secondary"
                             onClick={this.handleSnackbarFullscreen}>
                             <DoneIcon />
                         </IconButton>
                     </Tooltip>,
-                    <Tooltip title="Close">
+                    <Tooltip
+                        title="Close"
+                        key="close"
+                    >
                         <IconButton
-                            key="close"
                             color="primary"
                             onClick={this.handleSnackbarFullscreenClose}
                         >
@@ -225,7 +258,7 @@ export default withStyles(({ spacing }) => ({
         }
     }
 
-    public restart() {
+    private restart() {
         const { game } = this;
         if (game) {
             game.restart();
@@ -311,15 +344,33 @@ export default withStyles(({ spacing }) => ({
         this.game = instance;
     }
 
-    private readonly handleScore: ComponentProps<typeof Game>["onScore"] = (score) => {
+    private readonly handleScore: ComponentProps<typeof Game>["onScore"] = (score, data) => {
+        try {
+            // store game state
+            localStorage.setItem("2048", JSON.stringify(data));
+        } catch {
+            // pass
+        }
         this.setState({ score });
     }
 
     private readonly handleWin: ComponentProps<typeof Game>["onWin"] = (score) => {
+        try {
+            // reset memory
+            localStorage.setItem("2048", JSON.stringify([]));
+        } catch {
+            // pass
+        }
         this.setState({ score, winDialog: true });
     }
 
     private readonly handleLose: ComponentProps<typeof Game>["onLose"] = (score) => {
+        try {
+            // reset memory
+            localStorage.setItem("2048", JSON.stringify([]));
+        } catch {
+            // pass
+        }
         this.setState({ score, loseDialog: true });
     }
 
@@ -360,5 +411,18 @@ export default withStyles(({ spacing }) => ({
 
     private readonly handleSnackbarFullscreenClose = () => {
         this.setState({ snackbarFullScreen: false });
+    }
+
+    private readonly handleRestartDialogOpen = () => {
+        this.setState({ restartDialog: true });
+    }
+
+    private readonly handleRestartDialogNo = () => {
+        this.setState({ restartDialog: false });
+    }
+
+    private readonly handleRestartDialogYes = () => {
+        this.restart();
+        this.setState({ restartDialog: false });
     }
 });
