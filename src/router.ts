@@ -3,14 +3,13 @@
 import { ComponentType } from "react";
 import { distinctUntilChanged, map } from "rxjs/operators";
 import UniversalRouter, { Context } from "universal-router";
-import HomePageComponent from "./page/home";
 import { router$ } from "./store";
 
 const router = new UniversalRouter<Context, ComponentType<any>>(
     [
         {
             path: "/",
-            action: () => HomePageComponent,
+            action: () => import(/* webpackPreload: true */"./page/home").then((_) => _.default),
             name: "homepage",
         },
         {
@@ -18,9 +17,14 @@ const router = new UniversalRouter<Context, ComponentType<any>>(
             action: () => import("./page/secret").then((_) => _.default),
             name: "konami",
         },
+        {
+            path: "/2048",
+            action: () => import("./page/2048").then((_) => _.default),
+            name: "2048",
+        },
     ],
     {
-        errorHandler: () => HomePageComponent,
+        errorHandler: () => import("./page/home").then((_) => _.default),
     },
 );
 

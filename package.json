@@ -26,12 +26,14 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
+    "@types/circular-dependency-plugin": "^5.0.0",
     "@types/html-webpack-plugin": "^3.0.0",
     "@types/jest": "^24.0.0",
     "@types/react-test-renderer": "^16.0.0",
     "@types/webpack": "^4.0.0 <4.29.0",
     "@types/webpack-dev-server": "^3.0.0",
     "@wasm-tool/wasm-pack-plugin": "<1.0.0",
+    "circular-dependency-plugin": "^5.0.0",
     "html-webpack-plugin": "^3.0.0",
     "jest": "^24.0.0",
     "pug": "^2.0.0",
@@ -51,14 +53,17 @@
   "dependencies": {
     "@material-ui/core": "^3.0.0",
     "@material-ui/icons": "^3.0.0",
+    "@types/fscreen": "^1.0.0",
     "@types/react": "^16.0.0",
     "@types/react-dom": "^16.0.0",
     "@types/redux-first-routing": "^0.3.0",
+    "fscreen": "^1.0.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "redux-devtools-extension": "^2.0.0",
     "redux-first-routing": "^0.3.0",
     "redux-observable": "^1.0.0",
+    "resize-observer-polyfill": "^1.0.0",
     "rxjs": "^6.0.0",
     "tslib": "^1.9.0",
     "universal-router": "^8.0.0"
