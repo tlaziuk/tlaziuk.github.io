@@ -1,13 +1,15 @@
+// tslint:disable:max-line-length
+
 import { Observable } from "rxjs";
+
+declare const ResizeObserver: any;
 
 export default (target: Element) => new Observable<DOMRectReadOnly>(
     (subscriber) => {
         const unsub = (async () => {
             try {
                 const Observer: typeof import("resize-observer-polyfill")["default"] = (
-                    (window as any).ResizeObserver ?
-                        (window as any).ResizeObserver : (await import("resize-observer-polyfill")).default
-
+                    typeof ResizeObserver === "undefined" ? (await import("resize-observer-polyfill")).default : ResizeObserver
                 );
 
                 const instance = new Observer((entries) => {

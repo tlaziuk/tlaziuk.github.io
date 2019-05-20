@@ -92,6 +92,7 @@ module.exports = {
         extensions: [
             ".ts",
             ".tsx",
+            ".mjs",
             ".js",
             ".jsx",
         ],
