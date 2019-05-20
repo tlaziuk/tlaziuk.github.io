@@ -1,7 +1,14 @@
 language: node_js
 node_js:
   - "node"
-cache: npm
+cache:
+  yarn: true
+  directories:
+    - node_modules
+before_install:
+  - npm install -g yarn
+install:
+  - yarn install
 deploy:
   provider: pages
   skip_cleanup: true
@@ -13,6 +20,6 @@ deploy:
   on:
     branch: source
 script:
-  - npm run test
-  - npm run lint
-  - npm run build:prod
+  - yarn run test
+  - yarn run lint
+  - yarn run build:prod
