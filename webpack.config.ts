@@ -74,6 +74,8 @@ module.exports = {
           failOnError: true,
         }),
         new EnvironmentPlugin({
+            APP_EMAIL: process.env.APP_EMAIL,
+            APP_NAME: process.env.APP_NAME,
             GIT_REV: childProcessExecSync("git rev-parse HEAD").toString().trim(),
             TIMESTAMP: Date.now(),
         }),
@@ -81,7 +83,7 @@ module.exports = {
             chunksSortMode: "none",
             inject: false,
             template: pathNormalize(pathJoin(__dirname, "src", "index.pug")),
-            title,
+            title: process.env.APP_NAME || title,
         }),
         new SriPlugin({
             enabled: isProduction,
