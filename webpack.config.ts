@@ -81,7 +81,7 @@ module.exports = {
             chunksSortMode: "none",
             inject: false,
             template: pathNormalize(pathJoin(__dirname, "src", "index.pug")),
-            title,
+            title: process.env.APP_NAME || title,
         }),
         new SriPlugin({
             enabled: isProduction,
