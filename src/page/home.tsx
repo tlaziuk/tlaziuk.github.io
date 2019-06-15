@@ -56,7 +56,7 @@ export default withStyles(
                 </a>
             </div>
             <Typography variant="caption" className={classes!.revision}>
-                rev. <GitRevision length={7} /> <BuildDate />
+                <GitRevision length={7} /> <BuildDate />
             </Typography>
         </>;
     }

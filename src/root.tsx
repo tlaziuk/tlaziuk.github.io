@@ -13,7 +13,7 @@ interface IState {
 export default class RootContainer extends PureComponent<any, IState> {
     public readonly state: Readonly<IState> = {
         node: lazy(() => new Promise<any>(() => {
-            // pass
+            // promise never resolves
         })),
     };
 
