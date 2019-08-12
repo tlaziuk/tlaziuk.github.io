@@ -413,7 +413,7 @@ export default withStyles(({ spacing }) => ({
     item: {
         display: "inline-block",
         left: 0,
-        padding: spacing.unit,
+        padding: spacing(),
         position: "absolute",
         top: 0,
         transformOrigin: "center",
