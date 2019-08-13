@@ -72,8 +72,16 @@ export default class Game2048 {
         public readonly size: number,
     ) { }
 
+    public isOnBoard(x: ITile["x"], y: ITile["y"]) {
+        return x >= 1 && x <= this.size && y >= 1 && y <= this.size;
+    }
+
     public getTile(x: ITile["x"], y: ITile["y"]) {
-        return this.data.find((_) => _.x === x && _.y === y);
+        if (!this.isOnBoard(x, y)) {
+            throw new Error(`coordinates ${JSON.stringify({ x, y })} are not on the board`);
+        }
+
+        return this.data.find((_) => _.x === x && _.y === y)!;
     }
 
     /**
