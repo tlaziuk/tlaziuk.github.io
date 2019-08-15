@@ -1,3 +1,4 @@
+import { BehaviorSubject } from "rxjs";
 import uuid from "uuid/v4";
 
 interface ITile {
@@ -57,13 +58,19 @@ function isTileValid(
 }
 
 export default class Game2048 {
-    private data: ReadonlyArray<Readonly<ITile>> = Array(this.size ** 2).fill(undefined).map(
-        (_, index) => ({
-            uid: uuid(),
-            value: 0,
-            x: (index % this.size) + 1,
-            y: Math.floor(index / this.size) + 1,
-        }),
+    public get data() {
+        return this.data$.getValue();
+    }
+
+    private readonly data$ = new BehaviorSubject<ReadonlyArray<Readonly<ITile>>>(
+        Array(this.size ** 2).fill(undefined).map(
+            (_, index) => ({
+                uid: uuid(),
+                value: 0,
+                x: (index % this.size) + 1,
+                y: Math.floor(index / this.size) + 1,
+            }),
+        ),
     );
 
     private state: GameState = GameState.Playing;
@@ -119,8 +126,33 @@ export default class Game2048 {
             }
         }
 
-        this.data = data;
+        this.data$.next(data);
 
         this.state = GameState.Playing;
+    }
+
+    public setTile(
+        x: ITile["x"],
+        y: ITile["y"],
+        {
+            value,
+            uid = uuid(),
+        }: Omit<ITile, "x" | "y" | "uid"> & Partial<Pick<ITile, "uid">>,
+    ) {
+        const tile: Readonly<ITile> = {
+            uid,
+            value,
+            x,
+            y,
+        };
+        const data = this.data.map(
+            (_) => x === _.x && y === _.y ? tile : _,
+        );
+
+        if (!isTileValid(tile, data)) {
+            throw new Error(`tile is invalid: ${JSON.stringify(tile)}`);
+        }
+
+        this.data$.next(data);
     }
 }
