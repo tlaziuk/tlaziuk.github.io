@@ -94,3 +94,8 @@ export default class Konami extends Component<IProps> {
         }
     }
 }
+
+// @ts-ignore
+import("../../../crate/pkg").then((module: any) => {
+    module.run();
+});

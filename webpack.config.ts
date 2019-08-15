@@ -23,7 +23,7 @@ const LoaderTypeScript: Loader = {
         compilerOptions: {
             module: "esnext",
             sourceMap: !isProduction,
-            target: "es5",
+            target: "es6",
         },
         transpileOnly: true,
     },
@@ -98,6 +98,7 @@ module.exports = {
             ".tsx",
             ".js",
             ".jsx",
+            ".wasm",
         ],
     },
     target: "web",
