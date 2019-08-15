@@ -103,7 +103,7 @@ describe(Game2048, () => {
         }).not.toThrow();
     });
 
-    it.todo(`${Game2048.prototype.getFarthestTile.name} should return proper farthest tile with same value`, () => {
+    it(`${Game2048.prototype.getFarthestTile.name} should return proper farthest tile with same value`, () => {
         const board = new Game2048(3);
         /**
          * 1 0 2
