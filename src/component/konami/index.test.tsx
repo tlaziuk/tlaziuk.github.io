@@ -32,7 +32,7 @@ describe(Konami, () => {
                         addEventListener,
                         removeEventListener,
                     },
-                }),
+                } as any),
             },
         );
     });
