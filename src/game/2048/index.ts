@@ -91,8 +91,12 @@ export default class Game2048 {
      * @returns farthest tile to given tile which value is the same as the given tile
      */
     public getFarthestTile(tile: Readonly<ITile>, { x: vectorX, y: vectorY }: IVector): Readonly<ITile> {
-        const { value: originalValue } = tile;
+        if (vectorX === vectorY) {
+            return tile;
+        }
 
+        const { value: originalValue } = tile;
+        
         let farthestTile: ReturnType<Game2048["getTile"]> = tile;
 
         do {
@@ -100,16 +104,13 @@ export default class Game2048 {
                 farthestTile,
                 this.getTile(farthestTile.x + vectorX, farthestTile.y + vectorY),
             ]);
+
+            if (farthestTile && farthestTile.value === originalValue) {
+                return farthestTile;
+            }
         } while (
             farthestTile
-            && tile !== farthestTile
-            && (
-                farthestTile.value === 0
-                || (
-                    farthestTile.value === originalValue
-                    && tile.value !== originalValue
-                )
-            )
+            && farthestTile.value === 0
         );
 
         return tile;
