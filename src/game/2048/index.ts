@@ -84,30 +84,33 @@ export default class Game2048 {
     }
 
     public getTile(x: ITile["x"], y: ITile["y"]) {
-        if (!this.isOnBoard(x, y)) {
-            throw new Error(`coordinates ${JSON.stringify({ x, y })} are not on the board`);
-        }
-
-        return this.data.find((_) => _.x === x && _.y === y)!;
+        return this.data.find((_) => _.x === x && _.y === y);
     }
 
     /**
      * @returns farthest tile to given tile which value is the same as the given tile
      */
     public getFarthestTile(tile: Readonly<ITile>, { x: vectorX, y: vectorY }: IVector): Readonly<ITile> {
-        if (vectorX === 0 && vectorY === 0) {
-            return tile;
-        }
+        const { value: originalValue } = tile;
 
-        let farthestTile = this.getTile(tile.x + vectorX, tile.y + vectorY);
+        let farthestTile: ReturnType<Game2048["getTile"]> = tile;
 
-        if (!farthestTile) {
-            return tile;
-        }
-
-        while (farthestTile) {
-            ([tile, farthestTile] = [farthestTile, this.getTile(farthestTile.x + vectorX, farthestTile.y + vectorY)]);
-        }
+        do {
+            ([tile, farthestTile] = [
+                farthestTile,
+                this.getTile(farthestTile.x + vectorX, farthestTile.y + vectorY),
+            ]);
+        } while (
+            farthestTile
+            && tile !== farthestTile
+            && (
+                farthestTile.value === 0
+                || (
+                    farthestTile.value === originalValue
+                    && tile.value !== originalValue
+                )
+            )
+        );
 
         return tile;
     }

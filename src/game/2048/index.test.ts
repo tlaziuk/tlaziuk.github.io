@@ -8,10 +8,10 @@ describe(Game2048, () => {
 
     it(`${Game2048.prototype.getTile.name} should return a tile`, () => {
         const board = new Game2048(4);
-        expect(() => { board.getTile(1, 1); }).not.toThrow();
-        expect(() => { board.getTile(4, 4); }).not.toThrow();
-        expect(() => { board.getTile(0, 0); }).toThrow();
-        expect(() => { board.getTile(5, 5); }).toThrow();
+        expect(board.getTile(1, 1)).toBeDefined();
+        expect(board.getTile(4, 4)).toBeDefined();
+        expect(board.getTile(0, 0)).toBeUndefined();
+        expect(board.getTile(5, 5)).toBeUndefined();
     });
 
     it(`${Game2048.prototype.set.name} should set a new game board`, () => {
@@ -106,9 +106,9 @@ describe(Game2048, () => {
     it(`${Game2048.prototype.getFarthestTile.name} should return proper farthest tile with same value`, () => {
         const board = new Game2048(3);
         /**
-         * 1 0 2
-         * 0 0 0
-         * 0 0 0
+         * 1(a) 0(b) 2(c)
+         * 0(d) 0(e) 0(f)
+         * 1(g) 0(h) 0(i)
          */
         board.set([
             {
@@ -161,16 +161,18 @@ describe(Game2048, () => {
             },
             {
                 uid: "i",
-                value: 0,
+                value: 1,
                 x: 3,
                 y: 3,
             },
         ]);
-        expect(board.getFarthestTile(board.getTile(1, 1), { x: 0, y: 1 }).uid).toBe("b");
-        expect(board.getFarthestTile(board.getTile(1, 1), { x: 1, y: 0 }).uid).toBe("d");
-        expect(board.getFarthestTile(board.getTile(1, 2), { x: 0, y: -1 }).uid).toBe("g");
-        expect(board.getFarthestTile(board.getTile(1, 3), { x: -1, y: 0 }).uid).toBe("a");
-        expect(board.getFarthestTile(board.getTile(1, 3), { x: 0, y: 1 }).uid).toBe("i");
-        expect(board.getFarthestTile(board.getTile(3, 1), { x: 0, y: -1 }).uid).toBe("d");
+        expect(board.getFarthestTile(board.getTile(1, 1)!, { x: 0, y: 0 } as any).uid).toBe("a");
+        expect(board.getFarthestTile(board.getTile(1, 1)!, { x: 0, y: 1 }).uid).toBe("g");
+        expect(board.getFarthestTile(board.getTile(1, 1)!, { x: 1, y: 0 }).uid).toBe("g");
+        expect(board.getFarthestTile(board.getTile(1, 2)!, { x: 0, y: -1 }).uid).toBe("b");
+        expect(board.getFarthestTile(board.getTile(1, 3)!, { x: 0, y: 1 }).uid).toBe("c");
+        expect(board.getFarthestTile(board.getTile(3, 1)!, { x: 0, y: -1 }).uid).toBe("g");
+        expect(board.getFarthestTile(board.getTile(3, 1)!, { x: 0, y: 1 }).uid).toBe("i");
+        expect(board.getFarthestTile(board.getTile(1, 3)!, { x: -1, y: 0 }).uid).toBe("b");
     });
 });
