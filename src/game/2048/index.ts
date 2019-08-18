@@ -88,7 +88,11 @@ export default class Game2048 {
     }
 
     /**
-     * @returns farthest tile to given tile which value is the same as the given tile
+     * get farthest tile to given tile which value is equal to the value of the given tile,
+     * or farthest tile which value is equal `0`,
+     * otherwise get given tile if above conditions could not be meet
+     *
+     * @returns farthest tile
      */
     public getFarthestTile(tile: Readonly<ITile>, { x: vectorX, y: vectorY }: IVector): Readonly<ITile> {
         if (vectorX === vectorY) {
@@ -96,7 +100,7 @@ export default class Game2048 {
         }
 
         const { value: originalValue } = tile;
-        
+
         let farthestTile: ReturnType<Game2048["getTile"]> = tile;
 
         do {
