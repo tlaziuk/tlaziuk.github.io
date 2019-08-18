@@ -1,50 +1,39 @@
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiThemeProvider } from "@material-ui/core/styles";
-import React, { ComponentType, lazy, LazyExoticComponent, PureComponent, Suspense } from "react";
-import { Unsubscribable } from "rxjs";
+import React, { ComponentType, lazy, LazyExoticComponent, Suspense, useEffect, useState } from "react";
 import ThemeColor from "./component/theme-color";
 import Progress from "./page/progress";
 import { resolvedRoute$ } from "./router";
 import theme from "./theme";
 
-interface IState {
-    node: LazyExoticComponent<ComponentType<any>>;
-}
+const defaultNode = lazy(() => new Promise<any>(() => {
+    // promise never resolves
+}));
 
-export default class RootContainer extends PureComponent<any, IState> {
-    public readonly state: Readonly<IState> = {
-        node: lazy(() => new Promise<any>(() => {
-            // promise never resolves
-        })),
-    };
+export default function RootContainer() {
+    const [Node, setNode] = useState<LazyExoticComponent<ComponentType<any>>>(defaultNode);
 
-    private nodeSubscription?: Unsubscribable;
+    useEffect(
+        () => {
+            const subscription = resolvedRoute$.subscribe(
+                (_) => {
+                    setNode(
+                        lazy(() => _.then((component) => ({ default: component }))),
+                    );
+                },
+            );
+            return () => {
+                subscription.unsubscribe();
+            };
+        },
+        [],
+    );
 
-    public componentDidMount() {
-        this.nodeSubscription = resolvedRoute$.subscribe(
-            (_) => {
-                this.setState({
-                    node: lazy(() => _.then((component) => ({ default: component }))),
-                });
-            },
-        );
-    }
-
-    public componentWillUnmount() {
-        const { nodeSubscription } = this;
-        if (nodeSubscription) {
-            nodeSubscription.unsubscribe();
-        }
-    }
-
-    public render() {
-        const { node: Node } = this.state;
-        return <MuiThemeProvider theme={theme}>
-            <CssBaseline />
-            <ThemeColor />
-            <Suspense fallback={<Progress />}>
-                <Node />
-            </Suspense>
-        </MuiThemeProvider>;
-    }
+    return <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <ThemeColor />
+        <Suspense fallback={<Progress />}>
+            <Node />
+        </Suspense>
+    </MuiThemeProvider>;
 }

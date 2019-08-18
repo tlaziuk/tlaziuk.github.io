@@ -1,8 +1,9 @@
-import { withTheme, WithTheme } from "@material-ui/core/styles";
-import { createElement, FunctionComponent, useEffect, useRef } from "react";
+import { useTheme } from "@material-ui/core/styles";
+import { createElement, useEffect, useRef } from "react";
 
-export default withTheme(
-    (function ThemeColor({
+export default function ThemeColor() {
+    const ref = useRef<HTMLDivElement | void>();
+    const {
         theme: {
             palette: {
                 background: {
@@ -10,47 +11,45 @@ export default withTheme(
                 },
             },
         },
-    }) {
-        const ref = useRef<HTMLDivElement | void>();
+    } = useTheme();
 
-        useEffect(
-            () => {
-                const { current: element } = ref;
-                if (!element) {
-                    return;
-                }
-                const { ownerDocument: document } = element;
-                if (!document) {
-                    return;
-                }
-                const { head } = document;
+    useEffect(
+        () => {
+            const { current: element } = ref;
+            if (!element) {
+                return;
+            }
+            const { ownerDocument: document } = element;
+            if (!document) {
+                return;
+            }
+            const { head } = document;
 
-                let metaTag = head.querySelector<HTMLMetaElement>(`meta[name="theme-color"]`);
+            let metaTag = head.querySelector<HTMLMetaElement>(`meta[name="theme-color"]`);
 
-                if (!metaTag) {
-                    metaTag = document.createElement("meta");
-                    metaTag.name = "theme-color";
-                    head.appendChild(metaTag);
-                }
+            if (!metaTag) {
+                metaTag = document.createElement("meta");
+                metaTag.name = "theme-color";
+                head.appendChild(metaTag);
+            }
 
-                metaTag.content = backgroundColor;
+            metaTag.content = backgroundColor;
 
-                return () => {
-                    head.removeChild(metaTag!);
-                };
-            },
-            [
-                ref.current,
-                backgroundColor,
-            ],
-        );
+            return () => {
+                head.removeChild(metaTag!);
+            };
+        },
+        [
+            ref.current,
+            backgroundColor,
+        ],
+    );
 
-        return createElement(
-            "div",
-            {
-                ref,
-                style: { display: "none" },
-            },
-        );
-    }) as FunctionComponent<WithTheme>,
-);
+    return createElement(
+        "div",
+        {
+            ref,
+            style: { display: "none" },
+        },
+    );
+}
