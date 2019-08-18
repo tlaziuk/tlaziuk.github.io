@@ -3,13 +3,14 @@
 import { ComponentType } from "react";
 import { distinctUntilChanged, map } from "rxjs/operators";
 import UniversalRouter, { Context } from "universal-router";
+import HomePage from "./page/home";
 import { router$ } from "./store";
 
 const router = new UniversalRouter<Context, ComponentType<any>>(
     [
         {
             path: "/",
-            action: () => import(/* webpackPreload: true */"./page/home").then((_) => _.default),
+            action: () => HomePage,
             name: "homepage",
         },
         {
