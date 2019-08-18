@@ -2,13 +2,11 @@ import { useTheme } from "@material-ui/core/styles";
 import { createElement, useEffect, useRef } from "react";
 
 export default function ThemeColor() {
-    const ref = useRef<HTMLDivElement | void>();
+    const ref = useRef<HTMLDivElement>(null);
     const {
-        theme: {
-            palette: {
-                background: {
-                    default: backgroundColor,
-                },
+        palette: {
+            background: {
+                default: backgroundColor,
             },
         },
     } = useTheme();
