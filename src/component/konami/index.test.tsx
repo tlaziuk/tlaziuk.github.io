@@ -1,5 +1,5 @@
 import React from "react";
-import { create, ReactTestRenderer } from "react-test-renderer";
+import { act, create, ReactTestRenderer } from "react-test-renderer";
 import { DeepPartial } from "redux";
 import Konami from "./index";
 
@@ -8,6 +8,21 @@ describe(Konami, () => {
     let addEventListener: jest.Mock<void, [keyof DocumentEventMap, any]>;
     let removeEventListener: jest.Mock<void, [keyof DocumentEventMap, any]>;
     let listenerMap: Record<keyof DocumentEventMap, (..._: any[]) => any>;
+    const defaultAction = () => {
+        // pass
+    };
+    const defaultCode = [
+        "ArrowUp",
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowLeft",
+        "ArrowRight",
+        "b",
+        "a",
+    ];
 
     beforeEach(() => {
         listenerMap = {} as any;
@@ -25,7 +40,7 @@ describe(Konami, () => {
         );
 
         element = create(
-            <Konami />,
+            <Konami action={defaultAction} code={defaultCode} />,
             {
                 createNodeMock: (): DeepPartial<HTMLElement> => ({
                     ownerDocument: {
@@ -52,10 +67,12 @@ describe(Konami, () => {
 
     it("should call execute the action after default sequence", () => {
         const action = jest.fn();
-        element.update(<Konami action={action} />);
-        for (const key of Konami.defaultProps.code!) {
-            listenerMap.keyup({ key });
-        }
+        element.update(<Konami action={action} code={defaultCode} />);
+        act(() => {
+            for (const key of defaultCode) {
+                listenerMap.keyup({ key });
+            }
+        });
         expect(action).toBeCalled();
     });
 });
