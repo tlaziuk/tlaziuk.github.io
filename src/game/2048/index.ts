@@ -59,10 +59,14 @@ function isTileValid(
 
 export default class Game2048 {
     public get data() {
-        return this.data$.getValue();
+        return this.dataSubject.getValue();
     }
 
-    private readonly data$ = new BehaviorSubject<ReadonlyArray<Readonly<ITile>>>(
+    public get data$() {
+        return this.dataSubject.asObservable();
+    }
+
+    private readonly dataSubject = new BehaviorSubject<ReadonlyArray<Readonly<ITile>>>(
         Array(this.size ** 2).fill(undefined).map(
             (_, index) => ({
                 uid: uuid(),
@@ -134,7 +138,7 @@ export default class Game2048 {
             }
         }
 
-        this.data$.next(data);
+        this.dataSubject.next(data);
 
         this.state = GameState.Playing;
     }
@@ -161,6 +165,8 @@ export default class Game2048 {
             throw new Error(`tile is invalid: ${JSON.stringify(tile)}`);
         }
 
-        this.data$.next(data);
+        this.dataSubject.next(data);
     }
+
+    public move({ x: vectorX, y: vectorY }: IVector) { }
 }

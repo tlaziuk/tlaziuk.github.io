@@ -1,3 +1,4 @@
+import { skip } from "rxjs/operators";
 import Game2048 from "./index";
 
 describe(Game2048, () => {
@@ -105,7 +106,7 @@ describe(Game2048, () => {
 
     it(`${Game2048.prototype.getFarthestTile.name} should return proper farthest tile with same value`, () => {
         const board = new Game2048(3);
-        
+
         board.set([
             {
                 uid: "a",
@@ -181,4 +182,23 @@ describe(Game2048, () => {
         expect(board.getFarthestTile(board.getTile(2, 2)!, { x: 1, y: 0 }).uid).toBe("f");
         expect(board.getFarthestTile(board.getTile(1, 3)!, { x: 1, y: 0 }).uid).toBe("i");
     });
+
+    it(`data$ should emit current tiles`, (done) => {
+        const board = new Game2048(2);
+        const { data } = board;
+        board.data$.subscribe((value) => {
+            expect(value).toEqual(data);
+            done();
+        });
+    }, 1000);
+
+    it(`${Game2048.prototype.move.name} should push values to data$`, (done) => {
+        const board = new Game2048(2);
+        const { data } = board;
+        board.data$.pipe(skip(1)).subscribe((value) => {
+            expect(value).not.toEqual(data);
+            done();
+        });
+        board.move({ x: 1, y: 0 });
+    }, 1000);
 });
