@@ -23,6 +23,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install --production=false --frozen-lockfile
       - run: yarn lint
+      - run: yarn build
   gh-pages:
     name: Publish GitHub Pages
     if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
@@ -38,11 +39,11 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install ✔️
         run: yarn install --production=false --frozen-lockfile
-      - name: Build storybook 🏗️
-        with:
+      - name: Export Next.js 🏗️
+        run: yarn export
+        env:
           NEXT_PUBLIC_APP_NAME: ${{ secrets.NEXT_PUBLIC_APP_NAME }}
           NEXT_PUBLIC_APP_EMAIL: ${{ secrets.NEXT_PUBLIC_APP_EMAIL }}
-        run: yarn export
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.3
         with:
