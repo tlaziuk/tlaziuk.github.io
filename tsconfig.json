@@ -1,19 +1,30 @@
 {
   "compilerOptions": {
-    "plugins": [{
-      "name": "typescript-tslint-plugin"
-    }],
-    "target": "es6",
-    "module": "commonjs",
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
+    "skipLibCheck": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "importHelpers": true,
-    "jsx": "react",
-    "lib": ["esnext", "dom"],
-    "sourceMap": true
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true
   },
-  "exclude": [
-    "/node_modules",
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
   ],
+  "exclude": [
+    "node_modules"
+  ]
 }
