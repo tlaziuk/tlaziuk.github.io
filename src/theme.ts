@@ -1,16 +1,22 @@
-import { PaletteType } from "@material-ui/core";
-import { createMuiTheme } from "@material-ui/core/styles";
+import { createTheme, PaletteMode } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 
-let type: PaletteType;
-
-try {
-    type = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-} catch {
-    type = "dark";
+declare module "@mui/styles/defaultTheme" {
+  interface DefaultTheme extends Theme {}
 }
 
-export default createMuiTheme({
-    palette: {
-        type,
-    },
+let mode: PaletteMode;
+
+try {
+  mode = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+} catch {
+  mode = "dark";
+}
+
+const theme = createTheme({
+  palette: {
+    mode,
+  },
 });
+
+export default theme;
