@@ -21,31 +21,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn install --production=false --frozen-lockfile
-      - run: yarn lint
-      - run: yarn build
-  gh-pages:
-    name: Publish GitHub Pages
-    if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
-    needs:
-      - test
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16
-          registry-url: "https://registry.npmjs.org"
-      - name: Install ✔️
+      - name: Install 🔥
         run: yarn install --production=false --frozen-lockfile
-      - name: Export Next.js 🏗️
-        run: yarn export
-        env:
-          NEXT_PUBLIC_APP_NAME: ${{ secrets.NEXT_PUBLIC_APP_NAME }}
-          NEXT_PUBLIC_APP_EMAIL: ${{ secrets.NEXT_PUBLIC_APP_EMAIL }}
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.3
-        with:
-          branch: gh-pages
-          folder: out
+      - name: Lint 🧪
+        run: yarn lint
+      - name: Build 🏗️
+        run: yarn build
