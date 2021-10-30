@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import {
   Email as EmailIcon,
   Twitter as TwitterIcon,
+  GitHub as GitHubIcon,
 } from "@mui/icons-material";
 import clsx from "clsx";
 import { exec } from "child_process";
@@ -27,6 +28,7 @@ const useStyles = makeStyles(
       position: "absolute",
       bottom: spacing(1),
       right: spacing(1),
+      textAlign: "right",
     },
     button: {},
   }),
@@ -53,7 +55,7 @@ const Home: NextPage<HomeProps> = (props) => {
     const [hash, timestamp] = revision;
     return [hash.slice(0, 7), new Date(timestamp).toISOString()] as const;
   }, [revision]);
-
+  // NEXT_PUBLIC_APP_GITHUB_URL
   return (
     <div className={clsx(rootClassName, className)}>
       <div className={buttonClassName}>
@@ -74,7 +76,19 @@ const Home: NextPage<HomeProps> = (props) => {
               href={`mailto:${process.env.NEXT_PUBLIC_APP_EMAIL}`}
               target="_blank"
             >
-              email
+              Email
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              startIcon={<GitHubIcon fontSize="inherit" color="inherit" />}
+              component="a"
+              variant="text"
+              size="large"
+              href={process.env.NEXT_PUBLIC_APP_GITHUB_URL}
+              target="_blank"
+            >
+              GitHub
             </Button>
           </Grid>
           <Grid item>
@@ -83,10 +97,10 @@ const Home: NextPage<HomeProps> = (props) => {
               component="a"
               variant="text"
               size="large"
-              href={`${process.env.NEXT_PUBLIC_APP_TWITTER_URL}`}
+              href={process.env.NEXT_PUBLIC_APP_TWITTER_URL}
               target="_blank"
             >
-              twitter
+              Twitter
             </Button>
           </Grid>
         </Grid>
