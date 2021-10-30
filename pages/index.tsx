@@ -1,14 +1,17 @@
 import type { GetStaticProps, NextPage } from "next";
-import { Button, Typography } from "@mui/material";
+import { Button, Grid, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { Email as EmailIcon } from "@mui/icons-material";
+import {
+  Email as EmailIcon,
+  Twitter as TwitterIcon,
+} from "@mui/icons-material";
 import clsx from "clsx";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { useMemo } from "react";
 
 const useStyles = makeStyles(
-  ({ spacing, palette }) => ({
+  ({ spacing, palette, typography }: Theme) => ({
     root: {
       backgroundColor: palette.background.default,
       height: "100vh",
@@ -19,6 +22,8 @@ const useStyles = makeStyles(
       justifyContent: "center",
     },
     revision: {
+      ...typography.caption,
+      color: palette.text.secondary,
       position: "absolute",
       bottom: spacing(1),
       right: spacing(1),
@@ -52,20 +57,43 @@ const Home: NextPage<HomeProps> = (props) => {
   return (
     <div className={clsx(rootClassName, className)}>
       <div className={buttonClassName}>
-        <Button
-          startIcon={<EmailIcon fontSize="inherit" color="inherit" />}
-          component="a"
-          variant="text"
-          size="large"
-          href={`mailto:${process.env.NEXT_PUBLIC_APP_EMAIL}`}
-          target="_blank"
+        <Grid
+          container
+          spacing={2}
+          alignItems="center"
+          alignContent="center"
+          justifyContent="center"
+          justifyItems="center"
         >
-          email me
-        </Button>
+          <Grid item>
+            <Button
+              startIcon={<EmailIcon fontSize="inherit" color="inherit" />}
+              component="a"
+              variant="text"
+              size="large"
+              href={`mailto:${process.env.NEXT_PUBLIC_APP_EMAIL}`}
+              target="_blank"
+            >
+              email
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              startIcon={<TwitterIcon fontSize="inherit" color="inherit" />}
+              component="a"
+              variant="text"
+              size="large"
+              href={`${process.env.NEXT_PUBLIC_APP_TWITTER_URL}`}
+              target="_blank"
+            >
+              twitter
+            </Button>
+          </Grid>
+        </Grid>
       </div>
-      <Typography className={revisionClassName} variant="caption">
+      <span className={revisionClassName}>
         {rev} {date}
-      </Typography>
+      </span>
     </div>
   );
 };

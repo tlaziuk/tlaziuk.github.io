@@ -1,10 +1,12 @@
+/* eslint-disable @next/next/no-page-custom-font */
 import Head from "next/head";
 import { AppProps } from "next/app";
 import { ThemeProvider } from "@mui/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
-import theme from "../src/theme";
-import createEmotionCache from "../src/createEmotionCache";
+import createEmotionCache from "../utils/createEmotionCache";
+import { useMakeTheme } from "../hooks/useMakeTheme";
+import { useEffect } from "react";
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -15,13 +17,28 @@ interface MyAppProps extends AppProps {
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
+  const theme = useMakeTheme();
+
+  useEffect(() => {
+    try {
+      document.getElementById("jss-server-side")?.remove();
+    } catch {
+      // pass
+    }
+  }, []);
+
   return (
     <CacheProvider value={emotionCache}>
-      <Head>
-        <title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
-        <meta name="viewport" content="initial-scale=1, width=device-width" />
-      </Head>
       <ThemeProvider theme={theme}>
+        <Head>
+          <title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
+          <meta name="theme-color" content={theme.palette.primary.main} />
+          <meta name="viewport" content="initial-scale=1, width=device-width" />
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+          />
+        </Head>
         <CssBaseline />
         <Component {...pageProps} />
       </ThemeProvider>
