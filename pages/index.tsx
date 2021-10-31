@@ -1,3 +1,4 @@
+import { HTMLAttributeAnchorTarget, ReactNode, useMemo } from "react";
 import type { GetStaticProps, NextPage } from "next";
 import { Button, Grid, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -5,11 +6,12 @@ import {
   Email as EmailIcon,
   Twitter as TwitterIcon,
   GitHub as GitHubIcon,
+  LinkedIn as LinkedInIcon,
+  SvgIconComponent,
 } from "@mui/icons-material";
 import clsx from "clsx";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { useMemo } from "react";
 
 const useStyles = makeStyles(
   ({ spacing, palette, typography }: Theme) => ({
@@ -43,6 +45,46 @@ interface HomeProps {
   readonly revision: readonly [gitHEAD: string, timestamp: number];
 }
 
+interface Social {
+  readonly icon: SvgIconComponent;
+  readonly href: string;
+  readonly target?: HTMLAttributeAnchorTarget;
+  readonly children: ReactNode;
+}
+
+const socials: ReadonlyArray<Social> = (
+  [
+    {
+      icon: EmailIcon,
+      href: (process.env.NEXT_PUBLIC_APP_EMAIL
+        ? `mailto:${process.env.NEXT_PUBLIC_APP_EMAIL}`
+        : undefined)!,
+      target: "_top",
+      children: "Email",
+    },
+    {
+      icon: GitHubIcon,
+      href: process.env.NEXT_PUBLIC_APP_GITHUB_URL!,
+      target: "_blank",
+      children: "GitHub",
+    },
+    {
+      icon: TwitterIcon,
+      href: process.env.NEXT_PUBLIC_APP_TWITTER_URL!,
+      target: "_blank",
+      children: "Twitter",
+    },
+    {
+      icon: LinkedInIcon,
+      href: process.env.NEXT_PUBLIC_APP_LINKEDIN_URL!,
+      target: "_blank",
+      children: "LinkedIn",
+    },
+  ] as const
+).filter(
+  (social: Partial<Social>): social is Social => typeof social.href === "string"
+);
+
 const Home: NextPage<HomeProps> = (props) => {
   const {
     root: rootClassName,
@@ -67,42 +109,20 @@ const Home: NextPage<HomeProps> = (props) => {
           justifyContent="center"
           justifyItems="center"
         >
-          <Grid item>
-            <Button
-              startIcon={<EmailIcon fontSize="inherit" color="inherit" />}
-              component="a"
-              variant="text"
-              size="large"
-              href={`mailto:${process.env.NEXT_PUBLIC_APP_EMAIL}`}
-              target="_blank"
-            >
-              Email
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              startIcon={<GitHubIcon fontSize="inherit" color="inherit" />}
-              component="a"
-              variant="text"
-              size="large"
-              href={process.env.NEXT_PUBLIC_APP_GITHUB_URL}
-              target="_blank"
-            >
-              GitHub
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              startIcon={<TwitterIcon fontSize="inherit" color="inherit" />}
-              component="a"
-              variant="text"
-              size="large"
-              href={process.env.NEXT_PUBLIC_APP_TWITTER_URL}
-              target="_blank"
-            >
-              Twitter
-            </Button>
-          </Grid>
+          {socials.map(({ icon: Icon, href, target, children }, index) => (
+            <Grid item key={index}>
+              <Button
+                startIcon={<Icon fontSize="inherit" color="inherit" />}
+                component="a"
+                variant="text"
+                size="large"
+                href={href}
+                target={target}
+              >
+                {children}
+              </Button>
+            </Grid>
+          ))}
         </Grid>
       </div>
       <span className={revisionClassName}>
