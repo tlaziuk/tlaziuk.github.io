@@ -2,20 +2,18 @@
 import { Children } from "react";
 import Document, { DocumentContext } from "next/document";
 import createEmotionServer from "@emotion/server/create-instance";
-import { ServerStyleSheets } from "@mui/styles";
 import createEmotionCache from "../utils/createEmotionCache";
 
 class MyDocument extends Document {
   public static async getInitialProps(ctx: DocumentContext) {
     const originalRenderPage = ctx.renderPage;
     const cache = createEmotionCache();
-    const sheets = new ServerStyleSheets();
     const { extractCriticalToChunks } = createEmotionServer(cache);
 
     ctx.renderPage = () =>
       originalRenderPage({
         enhanceApp: (App: any) => (props) =>
-          sheets.collect(<App emotionCache={cache} {...props} />),
+          <App emotionCache={cache} {...props} />,
       });
 
     const initialProps = await Document.getInitialProps(ctx);
@@ -30,11 +28,7 @@ class MyDocument extends Document {
 
     return {
       ...initialProps,
-      styles: [
-        ...Children.toArray(initialProps.styles),
-        ...emotionStyleTags,
-        sheets.getStyleElement(),
-      ],
+      styles: [...Children.toArray(initialProps.styles), ...emotionStyleTags],
     };
   }
 }

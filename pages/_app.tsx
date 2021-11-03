@@ -1,8 +1,7 @@
 /* eslint-disable @next/next/no-page-custom-font */
 import Head from "next/head";
 import { AppProps } from "next/app";
-import { ThemeProvider } from "@mui/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider, CssBaseline } from "@mui/material";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import createEmotionCache from "../utils/createEmotionCache";
 import { useMakeTheme } from "../hooks/useMakeTheme";
@@ -31,14 +30,6 @@ export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
   const theme = useMakeTheme();
-
-  useEffect(() => {
-    try {
-      document.getElementById("jss-server-side")?.remove();
-    } catch {
-      // pass
-    }
-  }, []);
 
   return (
     <CacheProvider value={emotionCache}>
