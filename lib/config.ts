@@ -9,7 +9,10 @@ export interface Social {
   readonly label: string;
   readonly href: string;
   readonly icon: IconName;
+  /** Opens outside this site, so it gets `target="_blank"`. */
   readonly external: boolean;
+  /** Added to the link's `rel` so the profile can be verified as mine. */
+  readonly profile: boolean;
 }
 
 /**
@@ -19,11 +22,22 @@ export interface Social {
  */
 export const config = {
   name: readEnv("APP_NAME") ?? "Tomek Łaziuk",
+  description: readEnv("APP_DESCRIPTION") ??
+    "Tomek Łaziuk — links to email, GitHub, Twitter and LinkedIn.",
+  url: readEnv("APP_URL"),
   email: readEnv("APP_EMAIL"),
   github: readEnv("APP_GITHUB_URL"),
   twitter: readEnv("APP_TWITTER_URL"),
   linkedin: readEnv("APP_LINKEDIN_URL"),
 };
+
+/**
+ * Absolute base URL for canonical links, `robots.txt` and the sitemap.
+ * `APP_URL` wins so the values stay correct behind proxies; otherwise the
+ * origin the request came in on is used.
+ */
+export const siteUrl = (origin: URL): string =>
+  (config.url ?? origin.origin).replace(/\/+$/, "");
 
 const candidates: ReadonlyArray<Social | null> = [
   config.email
@@ -32,6 +46,7 @@ const candidates: ReadonlyArray<Social | null> = [
       href: `mailto:${config.email}`,
       icon: "email",
       external: false,
+      profile: false,
     }
     : null,
   config.github
@@ -40,6 +55,7 @@ const candidates: ReadonlyArray<Social | null> = [
       href: config.github,
       icon: "github",
       external: true,
+      profile: true,
     }
     : null,
   config.twitter
@@ -48,6 +64,7 @@ const candidates: ReadonlyArray<Social | null> = [
       href: config.twitter,
       icon: "twitter",
       external: true,
+      profile: true,
     }
     : null,
   config.linkedin
@@ -56,6 +73,7 @@ const candidates: ReadonlyArray<Social | null> = [
       href: config.linkedin,
       icon: "linkedin",
       external: true,
+      profile: true,
     }
     : null,
 ];

@@ -5,9 +5,30 @@ const formatter = new Intl.DateTimeFormat("en", {
 });
 
 /**
- * Reads the current commit hash. `GIT_REVISION` is authoritative in containers,
- * where `.git` is not part of the image; outside of them we ask git, and fall
- * back to parsing `.git` directly for sandboxed runs without `--allow-run`.
+ * Resolves a git ref to a commit hash. `.git/HEAD` usually points at a file
+ * under `.git/refs`; packed clones keep the same mapping in `packed-refs`.
+ * Everything here is a plain file read, so no git binary is needed at runtime.
+ */
+const readRef = (ref: string): string | null => {
+  try {
+    return Deno.readTextFileSync(`.git/${ref}`).trim();
+  } catch {
+    // fall through to packed refs
+  }
+
+  try {
+    const packed = Deno.readTextFileSync(".git/packed-refs").split("\n");
+    const line = packed.find((entry) => entry.endsWith(` ${ref}`));
+    return line?.split(" ")[0] ?? null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Reads the current commit hash. `GIT_REVISION` is authoritative when set;
+ * otherwise git is asked, and as a last resort `.git/HEAD` is parsed directly
+ * for images that ship the git metadata without the git binary.
  */
 const readGitHash = (): string | null => {
   try {
@@ -24,7 +45,7 @@ const readGitHash = (): string | null => {
   try {
     const head = Deno.readTextFileSync(".git/HEAD").trim();
     const ref = head.match(/^ref: (.+)$/)?.[1];
-    return ref ? Deno.readTextFileSync(`.git/${ref}`).trim() : head;
+    return ref ? readRef(ref) : head;
   } catch {
     return null;
   }
@@ -45,10 +66,10 @@ const parseTimestamp = (value: string | undefined): Temporal.Instant => {
 };
 
 const hash = Deno.env.get("GIT_REVISION")?.trim() || readGitHash() || "unknown";
+const builtAt = parseTimestamp(Deno.env.get("BUILD_TIMESTAMP")?.trim());
 
 export const revision = {
   hash: hash.slice(0, 7),
-  builtAt: formatter.format(
-    parseTimestamp(Deno.env.get("BUILD_TIMESTAMP")?.trim()),
-  ),
+  builtAt: formatter.format(builtAt),
+  builtAtIso: builtAt.toString(),
 };

@@ -35,38 +35,58 @@ receives HTML and CSS only.
   icon body as SVG while rendering on the server, so icons cost no requests and
   no JavaScript.
 - **Revision footer** is resolved once at startup: `GIT_REVISION` first, then
-  `git rev-parse`, then `.git/HEAD`, then `unknown`. `BUILD_TIMESTAMP` is
-  formatted with `Temporal` and `Intl.DateTimeFormat` in UTC.
+  `git rev-parse`, then the `.git` metadata (loose refs and `packed-refs`), then
+  `unknown`. `BUILD_TIMESTAMP` is formatted with `Temporal` and
+  `Intl.DateTimeFormat` in UTC.
+
+## Discoverability and accessibility
+
+- `routes/_app.tsx` emits the description, canonical URL, Open Graph and Twitter
+  card metadata. `APP_URL` keeps those absolute URLs correct behind a proxy;
+  without it the incoming request origin is used.
+- `routes/robots.txt.ts` and `routes/sitemap.xml.ts` are generated from the same
+  origin, so crawlers only ever see absolute URLs.
+- There is no client-side analytics by design: the page loads no JavaScript, so
+  server access logs are the source of traffic data.
+- Profile links carry `rel="me"` and external links announce that they open a
+  new tab for screen readers.
+- The page keeps one `<h1>`, `header`/`nav`/`main`/`footer` landmarks, visible
+  focus outlines, AA contrast in both colour schemes and a `<time datetime>` for
+  the build timestamp. `color-scheme: light dark` keeps native UI in sync.
 
 ## Layout
 
-| Path                | Purpose                                                     |
-| ------------------- | ----------------------------------------------------------- |
-| `main.ts`           | Fresh app: static file middleware and file-system routes    |
-| `utils.ts`          | `define` helpers with the `ctx.state` type                  |
-| `client.ts`         | Stylesheet-only Vite client entry (no runtime code)         |
-| `assets/styles.css` | Tailwind import and `@theme` tokens                         |
-| `routes/_app.tsx`   | `<html>` shell: metadata, theme-color, body classes         |
-| `routes/index.tsx`  | The page itself                                             |
-| `routes/health.ts`  | `GET /health` → `200 ok`, used by the container healthcheck |
-| `components/`       | Server components (icon rendering, social links)            |
-| `lib/`              | Environment configuration and revision lookup               |
-| `static/`           | Files served as-is (favicon)                                |
+| Path                    | Purpose                                                   |
+| ----------------------- | --------------------------------------------------------- |
+| `main.ts`               | Fresh app: static file middleware and file-system routes  |
+| `utils.ts`              | `define` helpers with the `ctx.state` type                |
+| `client.ts`             | Stylesheet-only Vite client entry (no runtime code)       |
+| `assets/styles.css`     | Tailwind import and `@theme` tokens                       |
+| `routes/_app.tsx`       | `<html>` shell: metadata, theme-color, body classes       |
+| `routes/index.tsx`      | The page itself                                           |
+| `routes/health.ts`      | `GET /health` → empty `204` for the container healthcheck |
+| `routes/robots.txt.ts`  | Crawler rules plus the absolute sitemap URL               |
+| `routes/sitemap.xml.ts` | Single-entry sitemap                                      |
+| `components/`           | Server components (icon rendering, social links)          |
+| `lib/`                  | Environment configuration and revision lookup             |
+| `static/`               | Files served as-is (favicon)                              |
 
 ## Configuration
 
 All configuration is read from the environment at startup; links without a value
 are not rendered at all.
 
-| Variable           | Default              | Purpose                                |
-| ------------------ | -------------------- | -------------------------------------- |
-| `APP_NAME`         | `Tomek Łaziuk`       | Page title                             |
-| `APP_EMAIL`        | unset                | Renders the `mailto:` link             |
-| `APP_GITHUB_URL`   | unset                | GitHub profile URL                     |
-| `APP_TWITTER_URL`  | unset                | Twitter profile URL                    |
-| `APP_LINKEDIN_URL` | unset                | LinkedIn profile URL                   |
-| `GIT_REVISION`     | detected from `.git` | Commit hash shown in the footer        |
-| `BUILD_TIMESTAMP`  | server start time    | ISO 8601 instant or epoch milliseconds |
+| Variable           | Default              | Purpose                                     |
+| ------------------ | -------------------- | ------------------------------------------- |
+| `APP_NAME`         | `Tomek Łaziuk`       | Page title                                  |
+| `APP_EMAIL`        | unset                | Renders the `mailto:` link                  |
+| `APP_GITHUB_URL`   | unset                | GitHub profile URL                          |
+| `APP_TWITTER_URL`  | unset                | Twitter profile URL                         |
+| `APP_LINKEDIN_URL` | unset                | LinkedIn profile URL                        |
+| `APP_URL`          | request origin       | Origin for canonical links, robots, sitemap |
+| `APP_DESCRIPTION`  | built-in sentence    | Meta description for search and previews    |
+| `GIT_REVISION`     | detected from `.git` | Commit hash shown in the footer             |
+| `BUILD_TIMESTAMP`  | server start time    | ISO 8601 instant or epoch milliseconds      |
 
 Copy `.env.example` to `.env` for local development; `.env` is gitignored and is
 loaded automatically by `deno task start`.
@@ -98,17 +118,21 @@ The image builds the site and serves it from the same layer, so it needs no
 build step on the host:
 
 ```sh
-docker build --build-arg GIT_REVISION="$(git rev-parse HEAD)" -t tlaziuk-site .
-docker run -d --name tlaziuk-site -p 8000:8000 \
-  --env-file .env \
-  tlaziuk-site
+docker build -t tlaziuk-site .
+docker run -d --name tlaziuk-site -p 8000:8000 --env-file .env tlaziuk-site
 ```
 
 - The container always listens on port `8000`; map it to whatever the host
   needs.
-- `GIT_REVISION` is a build argument: the build uses it for asset cache-busting
-  and the image keeps it as an environment variable for the footer. `.git` is
-  not in the image.
+- The revision needs no build argument: `.dockerignore` keeps `.git/HEAD`,
+  `.git/refs` and `.git/packed-refs` in the build context (objects, logs and
+  hooks stay out), so the footer shows the built commit on its own. Setting
+  `GIT_REVISION` still overrides it, which is useful when the build comes from a
+  tarball without git metadata.
+- The base image is `denoland/deno:2.9.8` (Debian). The Alpine variant is far
+  smaller, but `deno task build` fails there: Tailwind's native scanner
+  (`@tailwindcss/oxide`) cannot load a matching native binding on that image
+  ("Cannot find native binding"). A shell-compatibility workaround is not worth
+  it for this site.
 - `HEALTHCHECK` polls `/health` with `deno eval`, since the Deno image ships no
-  `curl` or `wget`. Container orchestrators can rely on the reported health
-  status.
+  `curl` or `wget`; the endpoint answers with an empty `204`.

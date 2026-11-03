@@ -3,3 +3,7 @@
 @theme {
   --font-sans: "Roboto Variable", ui-sans-serif, system-ui, sans-serif;
 }
+
+:root {
+  color-scheme: light dark;
+}
