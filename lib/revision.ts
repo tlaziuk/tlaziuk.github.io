@@ -1,13 +1,7 @@
-const formatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "UTC",
-});
-
 /**
  * Resolves a git ref to a commit hash. `.git/HEAD` usually points at a file
  * under `.git/refs`; packed clones keep the same mapping in `packed-refs`.
- * Everything here is a plain file read, so no git binary is needed at runtime.
+ * Everything here is a plain file read, so no git binary is needed in images.
  */
 const readRef = (ref: string): string | null => {
   try {
@@ -68,8 +62,26 @@ const parseTimestamp = (value: string | undefined): Temporal.Instant => {
 const hash = Deno.env.get("GIT_REVISION")?.trim() || readGitHash() || "unknown";
 const builtAt = parseTimestamp(Deno.env.get("BUILD_TIMESTAMP")?.trim());
 
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+const formatterFor = (locale: string): Intl.DateTimeFormat => {
+  let formatter = formatters.get(locale);
+  if (formatter === undefined) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "UTC",
+    });
+    formatters.set(locale, formatter);
+  }
+  return formatter;
+};
+
 export const revision = {
   hash: hash.slice(0, 7),
-  builtAt: formatter.format(builtAt),
   builtAtIso: builtAt.toString(),
 };
+
+/** Renders the build timestamp in the visitor's locale, in UTC. */
+export const formatBuiltAt = (locale: string): string =>
+  formatterFor(locale).format(builtAt);

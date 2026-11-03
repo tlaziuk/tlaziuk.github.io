@@ -1,9 +1,9 @@
 import { SocialLinks } from "@/components/social-links.tsx";
 import { config } from "@/lib/config.ts";
-import { revision } from "@/lib/revision.ts";
+import { formatBuiltAt, revision } from "@/lib/revision.ts";
 import { define } from "@/utils.ts";
 
-export default define.page(function Home() {
+export default define.page(function Home({ state }) {
   return (
     <div class="flex min-h-dvh flex-col">
       <header class="sr-only">
@@ -15,7 +15,9 @@ export default define.page(function Home() {
       <footer class="p-2 text-right text-xs text-neutral-500 dark:text-neutral-400">
         <p>
           {revision.hash}{" "}
-          <time datetime={revision.builtAtIso}>{revision.builtAt}</time>
+          <time datetime={revision.builtAtIso} lang={state.locale}>
+            {formatBuiltAt(state.locale)}
+          </time>
         </p>
       </footer>
     </div>

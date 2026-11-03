@@ -1,9 +1,11 @@
 import { createDefine } from "fresh";
 
 /**
- * Shape of `ctx.state`, shared between middlewares and routes. Nothing is put
- * on it yet, but keeping the central definition makes adding state explicit.
+ * Data shared between middlewares and routes for a single request. The locale
+ * is resolved once from `Accept-Language` so every component formats the same.
  */
-export type State = Record<string, never>;
+export interface State {
+  locale: string;
+}
 
 export const define = createDefine<State>();

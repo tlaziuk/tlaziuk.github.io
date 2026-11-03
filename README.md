@@ -36,8 +36,12 @@ receives HTML and CSS only.
   no JavaScript.
 - **Revision footer** is resolved once at startup: `GIT_REVISION` first, then
   `git rev-parse`, then the `.git` metadata (loose refs and `packed-refs`), then
-  `unknown`. `BUILD_TIMESTAMP` is formatted with `Temporal` and
-  `Intl.DateTimeFormat` in UTC.
+  `unknown`. `BUILD_TIMESTAMP` is kept as a `Temporal.Instant` and rendered in
+  UTC.
+- **Locale** comes from the request: `main.ts` resolves `Accept-Language` once
+  per request into `ctx.state.locale` (English when nothing matches), and
+  `Intl.DateTimeFormat` renders the footer timestamp in it. The `<time>` element
+  carries that locale, while the page itself stays English.
 
 ## Discoverability and accessibility
 
@@ -68,7 +72,7 @@ receives HTML and CSS only.
 | `routes/robots.txt.ts`  | Crawler rules plus the absolute sitemap URL               |
 | `routes/sitemap.xml.ts` | Single-entry sitemap                                      |
 | `components/`           | Server components (icon rendering, social links)          |
-| `lib/`                  | Environment configuration and revision lookup             |
+| `lib/`                  | Environment configuration, locale and revision lookup     |
 | `static/`               | Files served as-is (favicon)                              |
 
 ## Configuration
