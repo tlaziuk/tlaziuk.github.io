@@ -1,0 +1,10 @@
+# Build context only needs sources plus the git metadata the footer reads.
+.git/objects
+.git/logs
+.git/hooks
+.gitignore
+_fresh
+node_modules
+.env
+.env.*
+*.log
